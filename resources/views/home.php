@@ -27,13 +27,13 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
         <main class="container-fluid p-4 p-md-5 flex-grow-1" id="mainViewContainer">
 
             <!-- HOME VIEW -->
-            <div id="view-home" class="d-none">
-                <div class="text-center py-5">
-                    <h2 class="fw-bold">Welcome to Capsule Letter Dashboard</h2>
+            <div id="view-home" class="row">
+                <div class="col-12">
+                    <h2 class="fw-bold mb-2">Home Dashboard</h2>
                     <p class="text-muted">Explore your secure digital time capsules.</p>
                 </div>
             </div>
-            
+
         </main>
 
         <!-- Footer -->

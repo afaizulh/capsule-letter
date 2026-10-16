@@ -27,9 +27,9 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
         <main class="container-fluid p-4 p-md-5 flex-grow-1" id="mainViewContainer">
 
             <!-- MY LETTER VIEW -->
-            <div id="view-my-letter" class="d-none">
-                <div class="py-4">
-                    <h2 class="fw-bold mb-3">My Letters</h2>
+            <div id="view-my-letter" class="row mb-4">
+                <div class="col-12">
+                    <h2 class="fw-bold mb-2">My Letters</h2>
                     <p class="text-muted">List of letters you have created for your future self.</p>
                     <div class="list-group mt-4">
                         <div class="list-group-item list-group-item-action p-4 border rounded-3 mb-3">
