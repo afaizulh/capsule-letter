@@ -1,5 +1,65 @@
 <?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
+require_once $_SERVER['DOCUMENT_ROOT']
+    . '/capsule-letter/config/app.php';
+
+// Pengujian tanpa login hanya boleh di localhost.
+if (!in_array(
+    $_SERVER['REMOTE_ADDR'] ?? '',
+    ['127.0.0.1', '::1'],
+    true
+)) {
+    http_response_code(403);
+    exit('Mode pengujian hanya tersedia di localhost.');
+}
+
+// Sementara memakai pemilik data dummy di database.
+// Nanti diganti ID dari session login.
+$userId = 1;
+
+header('Cache-Control: no-store');
+
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+try {
+    require_once $_SERVER['DOCUMENT_ROOT']
+        . '/capsule-letter/config/database.php';
+
+    mysqli_set_charset($conn, 'utf8mb4');
+    mysqli_query($conn, "SET time_zone = '+07:00'");
+
+    $stmt = mysqli_prepare(
+        $conn,
+        'SELECT id, title, unlock_date, is_public, created_at
+         FROM letters
+         WHERE user_id = ?
+         ORDER BY created_at DESC, id DESC
+         LIMIT 100'
+    );
+
+    mysqli_stmt_bind_param($stmt, 'i', $userId);
+    mysqli_stmt_execute($stmt);
+
+    $result = mysqli_stmt_get_result($stmt);
+    $letters = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+    mysqli_stmt_close($stmt);
+} catch (mysqli_sql_exception $error) {
+    error_log('My Letter: ' . $error->getMessage());
+
+    http_response_code(500);
+    exit('Data surat belum dapat dimuat.');
+}
+
+$escapeLetter = static function ($value): string {
+    return htmlspecialchars(
+        (string) $value,
+        ENT_QUOTES | ENT_SUBSTITUTE,
+        'UTF-8'
+    );
+};
+
+$letterTimezone = new DateTimeZone('Asia/Jakarta');
+$letterNow = new DateTimeImmutable('now', $letterTimezone);
 ?>
 
 <!DOCTYPE html>
@@ -7,6 +67,8 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
 
 <head>
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/head.php'; ?>
+    <link rel="stylesheet"
+      href="/capsule-letter/resources/css/my-letter.css?v=2">
 </head>
 
 <body>
@@ -24,22 +86,115 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
         </header>
 
         <!-- Dynamic Content View Container -->
-        <main class="container-fluid p-4 p-md-5 flex-grow-1" id="mainViewContainer">
+        <main class="container-fluid p-4 p-md-5 flex-grow-1"
+            id="mainViewContainer">
 
-            <!-- MY LETTER VIEW -->
             <div id="view-my-letter" class="row mb-4">
                 <div class="col-12">
                     <h2 class="fw-bold mb-2">My Letters</h2>
-                    <p class="text-muted">List of letters you have created for your future self.</p>
-                    <div class="list-group mt-4">
-                        <div class="list-group-item list-group-item-action p-4 border rounded-3 mb-3">
-                            <div class="d-flex w-100 justify-content-between">
-                                <h5 class="mb-1 fw-bold">Myself</h5>
-                                <small class="text-danger fw-semibold">Locked until 15 Okt 2026</small>
+
+                    <p class="text-muted">
+                        List of letters you have created for your future self.
+                    </p>
+
+                    <div id="letterList" class="list-group mt-4">
+
+                        <?php if (empty($letters)): ?>
+
+                            <div class="border rounded-3 p-4 text-secondary">
+                                Belum ada surat.
                             </div>
-                            <p class="mb-1 text-muted text-truncate">Dear gua, Jangan lupa dunia cuman sementara yakk...</p>
-                            <small class="text-secondary">Created: Today • Private</small>
-                        </div>
+
+                        <?php else: ?>
+
+                            <?php foreach ($letters as $letter): ?>
+                                <?php
+                                $unlockDate = new DateTimeImmutable(
+                                    $letter['unlock_date'],
+                                    $letterTimezone
+                                );
+
+                                $createdDate = new DateTimeImmutable(
+                                    $letter['created_at'],
+                                    $letterTimezone
+                                );
+
+                                $isOpen = $letterNow >= $unlockDate;
+                                ?>
+
+                                <article class="letter-card list-group-item
+                                                p-4 border rounded-3 mb-3">
+
+                                    <div class="d-flex flex-wrap
+                                                justify-content-between
+                                                align-items-start gap-2">
+
+                                        <h3 class="h5 mb-1 fw-bold text-break">
+                                            <?= $escapeLetter($letter['title']) ?>
+                                        </h3>
+
+                                        <small class="letter-status fw-semibold
+                                            <?= $isOpen
+                                                ? 'text-success'
+                                                : 'text-danger' ?>">
+
+                                            <?= $isOpen ? 'Ready to open' : 'Locked' ?>
+                                        </small>
+                                    </div>
+
+                                    <p class="mb-2">
+                                        <?= $isOpen
+                                            ? 'Surat ini sudah bisa dibuka.'
+                                            : 'Isi surat tersedia setelah waktu pembukaan.' ?>
+                                    </p>
+
+                                    <small class="text-secondary">
+                                        Created:
+                                        <?= $escapeLetter(
+                                            $createdDate->format('d/m/Y')
+                                        ) ?>
+
+                                        &bull;
+
+                                        <?= (int) $letter['is_public'] === 1
+                                            ? 'Public'
+                                            : 'Private' ?>
+                                    </small>
+
+                                    <div class="letter-actions d-flex justify-content-end gap-2 mt-3">
+                                        <button type="button"
+                                                class="letter-icon btn btn-dark rounded-3"
+                                                data-letter-id="<?= $escapeLetter($letter['id']) ?>"
+                                                data-action="update"
+                                                title="Update surat"
+                                                aria-label="Update surat">
+                                            <i class="bi bi-pencil-square" aria-hidden="true"></i>
+                                        </button>
+
+                                        <button type="button"
+                                                class="letter-icon btn btn-dark rounded-3"
+                                                data-letter-id="<?= $escapeLetter($letter['id']) ?>"
+                                                data-action="detail"
+                                                title="Detail surat"
+                                                aria-label="Detail surat">
+                                            <i class="bi bi-eye" aria-hidden="true"></i>
+                                        </button>
+
+                                        <button type="button"
+                                                class="letter-icon btn btn-dark rounded-3"
+                                                data-letter-id="<?= $escapeLetter($letter['id']) ?>"
+                                                data-action="delete"
+                                                title="Hapus surat"
+                                                aria-label="Hapus surat">
+                                            <i class="bi bi-trash" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </article>
+
+                            <?php endforeach; ?>
+
+                        <?php endif; ?>
+
                     </div>
                 </div>
             </div>
