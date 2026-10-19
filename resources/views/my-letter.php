@@ -1,6 +1,5 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT']
-    . '/capsule-letter/config/app.php';
+require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
 
 // Pengujian tanpa login hanya boleh di localhost.
 if (!in_array(
@@ -15,14 +14,18 @@ if (!in_array(
 // Sementara memakai pemilik data dummy di database.
 // Nanti diganti ID dari session login.
 $userId = 1;
+// Cek apakah user sudah login atau belum
+// if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+//     header('Location: login.php');
+//     exit;
+// }
 
 header('Cache-Control: no-store');
 
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 try {
-    require_once $_SERVER['DOCUMENT_ROOT']
-        . '/capsule-letter/config/database.php';
+    $conn = require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/database.php';
 
     mysqli_set_charset($conn, 'utf8mb4');
     mysqli_query($conn, "SET time_zone = '+07:00'");
@@ -68,7 +71,7 @@ $letterNow = new DateTimeImmutable('now', $letterTimezone);
 <head>
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/head.php'; ?>
     <link rel="stylesheet"
-      href="/capsule-letter/resources/css/my-letter.css?v=2">
+        href="/capsule-letter/resources/css/my-letter.css?v=2">
 </head>
 
 <body>
@@ -163,29 +166,29 @@ $letterNow = new DateTimeImmutable('now', $letterTimezone);
 
                                     <div class="letter-actions d-flex justify-content-end gap-2 mt-3">
                                         <button type="button"
-                                                class="letter-icon btn btn-dark rounded-3"
-                                                data-letter-id="<?= $escapeLetter($letter['id']) ?>"
-                                                data-action="update"
-                                                title="Update surat"
-                                                aria-label="Update surat">
+                                            class="letter-icon btn btn-dark rounded-3"
+                                            data-letter-id="<?= $escapeLetter($letter['id']) ?>"
+                                            data-action="update"
+                                            title="Update surat"
+                                            aria-label="Update surat">
                                             <i class="bi bi-pencil-square" aria-hidden="true"></i>
                                         </button>
 
                                         <button type="button"
-                                                class="letter-icon btn btn-dark rounded-3"
-                                                data-letter-id="<?= $escapeLetter($letter['id']) ?>"
-                                                data-action="detail"
-                                                title="Detail surat"
-                                                aria-label="Detail surat">
+                                            class="letter-icon btn btn-dark rounded-3"
+                                            data-letter-id="<?= $escapeLetter($letter['id']) ?>"
+                                            data-action="detail"
+                                            title="Detail surat"
+                                            aria-label="Detail surat">
                                             <i class="bi bi-eye" aria-hidden="true"></i>
                                         </button>
 
                                         <button type="button"
-                                                class="letter-icon btn btn-dark rounded-3"
-                                                data-letter-id="<?= $escapeLetter($letter['id']) ?>"
-                                                data-action="delete"
-                                                title="Hapus surat"
-                                                aria-label="Hapus surat">
+                                            class="letter-icon btn btn-dark rounded-3"
+                                            data-letter-id="<?= $escapeLetter($letter['id']) ?>"
+                                            data-action="delete"
+                                            title="Hapus surat"
+                                            aria-label="Hapus surat">
                                             <i class="bi bi-trash" aria-hidden="true"></i>
                                         </button>
                                     </div>

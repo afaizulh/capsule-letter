@@ -1,5 +1,11 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
+
+// Cek apakah user sudah login atau belum
+// if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+//     header('Location: login.php');
+//     exit;
+// }
 ?>
 
 <!DOCTYPE html>

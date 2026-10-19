@@ -1,5 +1,11 @@
 <?php
 include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
+
+// Cek apakah user sudah login atau belum
+// if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+//     header('Location: login.php');
+//     exit;
+// }
 ?>
 
 <!DOCTYPE html>
@@ -27,33 +33,33 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
         <main class="container-fluid p-4 p-md-5 flex-grow-1" id="mainViewContainer">
 
             <!-- CREATE VIEW  -->
+            <form id="letterForm" action="<?php echo $baseUrl; ?>/controller/create-letter/process-create.php" method="POST">
             <div id="view-create" class="row g-5">
-                <!-- Left Column: Form Inputs -->
                 <div class="col-lg-7 col-xl-8">
                     <div class="mb-4">
                         <h1 class="display-5 fw-bold mb-2">A Letter to My Future Self.</h1>
                         <p class="text-muted fs-6">Preserving This Strory for the Future</p>
                     </div>
 
-                    <form id="letterForm" onsubmit="handleFormSubmit(event)">
-                        <div class="mb-4">
-                            <label class="form-label fw-bold text-dark mb-2">Letter title</label>
-                            <input type="text" class="form-control fw-medium" id="letterTitle" required>
-                        </div>
 
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-dark mb-2">Content of Letter</label>
-                            <textarea class="form-control" id="letterContent" rows="10" required></textarea>
-                        </div>
+                    <div class="mb-4">
+                        <label class="form-label fw-bold text-dark mb-2">Letter Title</label>
+                        <input type="text" class="form-control fw-medium" id="title" name="title" placeholder="Input Title" required>
+                    </div>
 
-                        <!-- Helper Notes -->
-                        <div class="text-muted" style="font-size: 12px; line-height: 1.6;">
-                            <div>Before locking the letter <i class="bi bi-info-circle"></i></div>
-                            <div>Edit available for 3 days after creation.</div>
-                            <div>Deletion available for 7 days after creation.</div>
-                            <div>Editing the letter does not reset the deadline.</div>
-                        </div>
-                    </form>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold text-dark mb-2">Content of Letter</label>
+                        <textarea class="form-control" id="content" name="content" rows="10" placeholder="Input Content" required></textarea>
+                    </div>
+
+                    <!-- Helper Notes -->
+                    <div class="text-muted" style="font-size: 12px; line-height: 1.6;">
+                        <div>Before locking the letter <i class="bi bi-info-circle"></i></div>
+                        <div>Edit available for 3 days after creation.</div>
+                        <div>Deletion available for 7 days after creation.</div>
+                        <div>Editing the letter does not reset the deadline.</div>
+                    </div>
+
                 </div>
 
                 <!-- Right Column: Settings & Submit -->
@@ -63,10 +69,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
                         <div class="mb-4">
                             <label class="form-label fw-bold text-dark mb-2">Opening Date</label>
                             <div class="input-group">
-                                <input type="text" class="form-control fw-medium" id="openingDate" value="15 Oktober 2026">
-                                <span class="input-group-text bg-white border-start-0">
-                                    <i class="bi bi-calendar-event fs-5"></i>
-                                </span>
+                                <input type="date" class="form-control fw-medium" id="unlock_date" name="unlock_date" placeholder="Select Date" required>
                             </div>
                             <div class="form-text text-muted mt-1" style="font-size: 12px;">The letter is locked until this date.</div>
                         </div>
@@ -79,21 +82,20 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
                             <div class="method-card active p-3 mb-3 d-flex align-items-center justify-content-between" onclick="selectMethod('private')" id="cardPrivate">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="form-check m-0">
-                                        <input class="form-check-input" type="radio" name="methodRadio" id="radioPrivate" checked>
+                                        <input class="form-check-input" type="radio" name="is_public" value="0" id="radioPrivate" checked>
                                     </div>
                                     <div class="d-flex align-items-center gap-2">
                                         <i class="bi bi-lock fs-4 text-dark"></i>
                                         <span class="fw-bold">Private</span>
                                     </div>
                                 </div>
-                                <span class="badge bg-danger rounded-circle p-1" style="width: 8px; height: 8px; display: inline-block;"></span>
                             </div>
 
                             <!-- Public Option -->
                             <div class="method-card p-3 d-flex align-items-center justify-content-between" onclick="selectMethod('public')" id="cardPublic">
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="form-check m-0">
-                                        <input class="form-check-input" type="radio" name="methodRadio" id="radioPublic">
+                                        <input class="form-check-input" type="radio" name="is_public" value="1" id="radioPublic">
                                     </div>
                                     <div class="d-flex align-items-center gap-2">
                                         <i class="bi bi-globe fs-4 text-dark"></i>
@@ -109,13 +111,13 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
 
                     <!-- Submit Button -->
                     <div class="mt-4">
-                        <button type="button" onclick="submitLetter()" class="btn btn-sent w-100 shadow-sm">
+                        <button type="submit" class="btn btn-sent w-100 shadow-sm">
                             Sent to Future
                         </button>
                     </div>
                 </div>
             </div>
-
+            </form>
         </main>
 
         <!-- Footer -->
@@ -125,6 +127,35 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/scripts.php'; ?>
 
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const unlockInput = document.getElementById('unlock_date');
+            const unlockBtn = document.getElementById('unlockDateButton');
+
+            // Dapatkan tanggal hari ini dalam format YYYY-MM-DD
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const minDate = `${year}-${month}-${day}`;
+
+            // 2Set atribut min pada input tanggal (Mencegah pilih tanggal sebelum hari ini)
+            if (unlockInput) {
+                unlockInput.min = minDate;
+                unlockInput.value = minDate; // Set default nilai ke hari ini
+            }
+
+            // Fungsionalitas agar tombol ikon kalender ikut memicu popup date picker
+            if (unlockBtn && unlockInput) {
+                unlockBtn.addEventListener('click', function() {
+                    if (typeof unlockInput.showPicker === 'function') {
+                        unlockInput.showPicker(); // Standar modern browser untuk memunculkan kalender
+                    } else {
+                        unlockInput.focus();
+                    }
+                });
+            }
+        });
+
         // Method Selector Handler (Private / Public)
         function selectMethod(type) {
             const cardPrivate = document.getElementById('cardPrivate');
@@ -143,20 +174,6 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
                 radioPublic.checked = true;
                 radioPrivate.checked = false;
             }
-        }
-
-        // Form Submit Simulation
-        function submitLetter() {
-            const title = document.getElementById('letterTitle').value;
-            const content = document.getElementById('letterContent').value;
-            const openingDate = document.getElementById('openingDate').value;
-
-            if (!title || !content) {
-                alert('Silakan isi judul dan konten surat terlebih dahulu.');
-                return;
-            }
-
-            alert(`Berhasil! Surat "${title}" telah disimpan dan dikunci hingga ${openingDate}.`);
         }
     </script>
 </body>
