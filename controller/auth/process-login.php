@@ -13,6 +13,13 @@ if (empty($email) || empty($password)) {
 
 // Ambil data user berdasarkan email
 $stmt = mysqli_prepare($conn, "SELECT id, name, email, password FROM users WHERE email = ?");
+
+if (!$stmt) {
+    error_log('Gagal menyiapkan query login: ' . mysqli_error($conn));
+    http_response_code(500);
+    exit('Terjadi kesalahan pada sistem. Silakan coba kembali.');
+}
+
 mysqli_stmt_bind_param($stmt, "s", $email);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
