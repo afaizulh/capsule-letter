@@ -4,7 +4,8 @@ $conn = require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/databas
 
 $errors = [];
 
-$user_id = $_SESSION['user_id'];
+$user_id = 1;
+// $user_id = $_SESSION['user_id'];
 $title = trim($_POST['title'] ?? '');
 $content = trim($_POST['content'] ?? '');
 $unlock_date = trim($_POST['unlock_date'] ?? '');
@@ -41,5 +42,5 @@ if ($stmt) {
 
 // Tutup koneksi
 mysqli_close($conn);
-header('Location: /resources/views/create.php');
+header('Location: /capsule-letter/resources/views/create.php');
 exit;
