@@ -2,10 +2,10 @@
 
 $conn = require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/database.php';
 
-if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-    header('Location: /capsule-letter/resources/views/login.php');
-    exit;
-}
+// if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+//     header('Location: /capsule-letter/resources/views/login.php');
+//     exit;
+// }
 
 $errors = [];
 
