@@ -1,4 +1,4 @@
-## Ini adalah project 2 CCIT Semester 3 Quarter 1.
+## Ini adalah project 2 CCIT FTUI Semester 3 Quarter 1.
 
 **Judul** : Capsule Letter
 
