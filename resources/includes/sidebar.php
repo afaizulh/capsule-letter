@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="../css/sidebar.css">
+
 <!-- Mobile Header Toggle -->
 <div class="d-lg-none p-3 border-bottom d-flex justify-content-between align-items-center bg-white sticky-top">
     <h5 class="m-0 fw-bold">CAPSULE LETTER<span class="brand-dot"></span></h5>
@@ -18,13 +20,13 @@
 
         <div class="nav flex-column">
             <a href="home.php" class="nav-link-custom <?= basename($_SERVER['PHP_SELF']) == 'home.php' ? 'active' : '' ?>">
-                <i class="bi bi-house fs-5 me-3 text-dark"></i> Home
+                <i class="bi bi-house fs-5 me-3"></i> Home
             </a>
             <a href="create.php" class="nav-link-custom <?= basename($_SERVER['PHP_SELF']) == 'create.php' ? 'active' : '' ?>">
-                <i class="bi bi-pencil fs-5 me-3 text-dark"></i> Create
+                <i class="bi bi-pencil fs-5 me-3"></i> Create
             </a>
             <a href="my-letter.php" class="nav-link-custom <?= basename($_SERVER['PHP_SELF']) == 'my-letter.php' ? 'active' : '' ?>">
-                <i class="bi bi-envelope-paper fs-5 me-3 text-dark"></i> My Letter
+                <i class="bi bi-envelope-paper fs-5 me-3"></i> My Letter
             </a>
         </div>
     </div>

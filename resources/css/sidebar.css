@@ -1,0 +1,42 @@
+#sidebar .nav-link-custom {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    background-color: transparent;
+    color: #000;
+    font-weight: 400;
+    transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+/* Menu halaman yang sedang dibuka */
+#sidebar .nav-link-custom.active {
+    font-weight: 700;
+}
+
+/* Hover untuk semua menu, termasuk menu aktif */
+#sidebar .nav-link-custom:hover {
+    background-color: #00FA9A;
+    color: #fff;
+}
+
+/* Saat mouse sedang ditekan, termasuk pada menu aktif */
+#sidebar .nav-link-custom:active {
+    background-color: transparent;
+    color: #000;
+}
+
+/* Ikon selalu mengikuti warna teks menu */
+#sidebar .nav-link-custom i,
+#sidebar .nav-link-custom i::before,
+#sidebar .nav-link-custom.active i,
+#sidebar .nav-link-custom.active i::before {
+    color: inherit !important;
+}
+
+/* Penanda navigasi menggunakan keyboard */
+#sidebar .nav-link-custom:focus-visible {
+    outline: 2px solid #00FA9A;
+    outline-offset: 2px;
+}
