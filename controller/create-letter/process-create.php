@@ -1,16 +1,18 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 $conn = require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/database.php';
 
-// if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-//     header('Location: /capsule-letter/resources/views/login.php');
-//     exit;
-// }
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header('Location: /capsule-letter/resources/views/auth/login.php');
+    exit;
+}
 
 $errors = [];
 
-$user_id = 1;
-// $user_id = $_SESSION['user_id'];
+$user_id = $_SESSION['user_id'];
 $title = trim($_POST['title'] ?? '');
 // $category_id = intval($_POST['category_id'] ?? 0);
 $category_id = intval($_POST['category_id'] ?? null);
@@ -19,7 +21,7 @@ $unlock_date = trim($_POST['unlock_date'] ?? '');
 $is_public = intval($_POST['is_public'] ?? 0); // 0 untuk Private, 1 untuk Publik
 
 if (empty($title)) $errors[] = 'You have to fill the title.';
-// if (empty($category_id)) $errors[] = 'Category must be selected.';
+if (empty($category_id)) $errors[] = 'Category must be selected.';
 if (empty($content)) $errors[] = 'You have to fill the content.';
 if (empty($unlock_date)) $errors[] = 'You have to select an opening date.';
 

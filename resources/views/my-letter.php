@@ -1,24 +1,17 @@
 <?php
-require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
-
-// Pengujian tanpa login hanya boleh di localhost.
-if (!in_array(
-    $_SERVER['REMOTE_ADDR'] ?? '',
-    ['127.0.0.1', '::1'],
-    true
-)) {
-    http_response_code(403);
-    exit('Mode pengujian hanya tersedia di localhost.');
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-// Sementara memakai pemilik data dummy di database.
-// Nanti diganti ID dari session login.
-$userId = 1;
+require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
+
 // Cek apakah user sudah login atau belum
-// if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-//     header('Location: login.php');
-//     exit;
-// }
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header('Location: /capsule-letter/resources/views/auth/login.php');
+    exit;
+}
+
+$userId = $_SESSION['user_id'];
 
 header('Cache-Control: no-store');
 
@@ -50,7 +43,7 @@ try {
     error_log('My Letter: ' . $error->getMessage());
 
     http_response_code(500);
-    exit('Data surat belum dapat dimuat.');
+    exit('Letters could not be retrieved. Please try again later.');
 }
 
 $escapeLetter = static function ($value): string {
@@ -105,7 +98,7 @@ $letterNow = new DateTimeImmutable('now', $letterTimezone);
                         <?php if (empty($letters)): ?>
 
                             <div class="border rounded-3 p-4 text-secondary">
-                                Belum ada surat.
+                                There are no letters yet. You can create a new letter by clicking the "Create Letter" button.
                             </div>
 
                         <?php else: ?>
@@ -147,8 +140,8 @@ $letterNow = new DateTimeImmutable('now', $letterTimezone);
 
                                     <p class="mb-2">
                                         <?= $isOpen
-                                            ? 'Surat ini sudah bisa dibuka.'
-                                            : 'Isi surat tersedia setelah waktu pembukaan.' ?>
+                                            ? 'This letter is now open for reading.'
+                                            : 'The content of this letter will be available after the opening time.' ?>
                                     </p>
 
                                     <small class="text-secondary">
@@ -169,8 +162,8 @@ $letterNow = new DateTimeImmutable('now', $letterTimezone);
                                             class="letter-icon btn btn-dark rounded-3"
                                             data-letter-id="<?= $escapeLetter($letter['id']) ?>"
                                             data-action="update"
-                                            title="Update surat"
-                                            aria-label="Update surat">
+                                            title="Update letter"
+                                            aria-label="Update letter">
                                             <i class="bi bi-pencil-square" aria-hidden="true"></i>
                                         </button>
 
@@ -178,8 +171,8 @@ $letterNow = new DateTimeImmutable('now', $letterTimezone);
                                             class="letter-icon btn btn-dark rounded-3"
                                             data-letter-id="<?= $escapeLetter($letter['id']) ?>"
                                             data-action="detail"
-                                            title="Detail surat"
-                                            aria-label="Detail surat">
+                                            title="Detail letter"
+                                            aria-label="Detail letter">
                                             <i class="bi bi-eye" aria-hidden="true"></i>
                                         </button>
 
@@ -187,8 +180,8 @@ $letterNow = new DateTimeImmutable('now', $letterTimezone);
                                             class="letter-icon btn btn-dark rounded-3"
                                             data-letter-id="<?= $escapeLetter($letter['id']) ?>"
                                             data-action="delete"
-                                            title="Hapus surat"
-                                            aria-label="Hapus surat">
+                                            title="Delete letter"
+                                            aria-label="Delete letter">
                                             <i class="bi bi-trash" aria-hidden="true"></i>
                                         </button>
                                     </div>

@@ -1,11 +1,15 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
 
 // Cek apakah user sudah login atau belum
-// if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-//     header('Location: login.php');
-//     exit;
-// }
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header('Location: /capsule-letter/resources/views/auth/login.php');
+    exit;
+}
 
 $conn = require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/database.php';
 $categoriesResult = mysqli_query($conn, "SELECT id, name FROM categories");
@@ -39,7 +43,7 @@ $categoriesResult = mysqli_query($conn, "SELECT id, name FROM categories");
         <main class="container-fluid p-4 p-md-5 flex-grow-1" id="mainViewContainer">
 
             <!-- CREATE VIEW  -->
-            <form id="letterForm" action="<?php echo $baseUrl; ?>/controller/create-letter/process-create.php" method="POST" enctype="multipart/form-data">
+            <form id="letterForm" action="<?php echo $baseUrl; ?>/controller/create-letter/process-create.php" method="POST" enctype="multipart/form-data" onsubmit="tinymce.triggerSave();">
                 <div id="view-create" class="row g-5">
                     <div class="col-lg-7 col-xl-8">
                         <div class="mb-4">
