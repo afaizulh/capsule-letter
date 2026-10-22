@@ -98,7 +98,7 @@ $letterNow = new DateTimeImmutable('now', $letterTimezone);
                         <?php if (empty($letters)): ?>
 
                             <div class="border rounded-3 p-4 text-secondary">
-                                There are no letters yet. You can create a new letter by clicking the "Create Letter" button.
+                                There are no letters yet.
                             </div>
 
                         <?php else: ?>
