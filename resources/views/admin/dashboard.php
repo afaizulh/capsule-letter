@@ -95,7 +95,7 @@ $words = mysqli_query($conn, "SELECT * FROM forbidden_words ORDER BY id DESC");
                                             <td class="fw-bold"><?= htmlspecialchars($c['name']); ?></td>
                                             <td><code><?= htmlspecialchars($c['slug']); ?></code></td>
                                             <td class="text-center">
-                                                <a href="/capsule-letter/controller/admin/process-category.php?action=delete&id=<?= $c['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this category?')">
+                                                <a href="<?php echo $baseUrl; ?>/controller/admin/process-category.php?action=delete&id=<?= $c['id']; ?>" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this category?')">
                                                     <i class="bi bi-trash"></i>
                                                 </a>
                                             </td>
@@ -113,7 +113,7 @@ $words = mysqli_query($conn, "SELECT * FROM forbidden_words ORDER BY id DESC");
                         <h4 class="fw-bold mb-3"><i class="bi bi-shield-x me-2"></i> Forbidden Words</h4>
 
                         <!-- Form Tambah Kata Terlarang -->
-                        <form action="/capsule-letter/controller/admin/process-word.php?action=add" method="POST" class="mb-4">
+                        <form action="<?php echo $baseUrl; ?>/controller/admin/process-word.php?action=add" method="POST" class="mb-4">
                             <div class="input-group">
                                 <input type="text" name="word" class="form-control" placeholder="New forbidden word" required>
                                 <button type="submit" class="btn btn-danger">+ Add Word</button>
@@ -125,7 +125,7 @@ $words = mysqli_query($conn, "SELECT * FROM forbidden_words ORDER BY id DESC");
                             <?php while ($w = mysqli_fetch_assoc($words)): ?>
                                 <span class="badge bg-light text-dark border p-2 d-flex align-items-center gap-2">
                                     <span><?= htmlspecialchars($w['word']); ?></span>
-                                    <a href="/capsule-letter/controller/admin/process-word.php?action=delete&id=<?= $w['id']; ?>" class="text-danger text-decoration-none fw-bold" onclick="return confirm('Are you sure you want to delete this forbidden word?')">&times;</a>
+                                    <a href="<?php echo $baseUrl; ?>/controller/admin/process-word.php?action=delete&id=<?= $w['id']; ?>" class="text-danger text-decoration-none fw-bold" onclick="return confirm('Are you sure you want to delete this forbidden word?')">&times;</a>
                                 </span>
                             <?php endwhile; ?>
                         </div>

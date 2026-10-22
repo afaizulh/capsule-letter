@@ -48,6 +48,6 @@ if ($user = mysqli_fetch_assoc($result)) {
     }
 }
 
-$_SESSION['error'] = 'Email atau password salah.';
+$_SESSION['error'] = 'Email or password is incorrect.';
 header('Location: /capsule-letter/resources/views/auth/login.php');
 exit;

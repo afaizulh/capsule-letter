@@ -42,6 +42,23 @@ $categoriesResult = mysqli_query($conn, "SELECT id, name FROM categories");
         <!-- Dynamic Content View Container -->
         <main class="container-fluid p-4 p-md-5 flex-grow-1" id="mainViewContainer">
 
+            <!-- ALERT -->
+            <?php if (isset($_SESSION['success'])): ?>
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <?= $_SESSION['success'];
+                    unset($_SESSION['success']); ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+            <?php if (isset($_SESSION['error'])): ?>
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <?= $_SESSION['error'];
+                    unset($_SESSION['error']); ?>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            <?php endif; ?>
+            <!-- END ALERT -->
+
             <!-- CREATE VIEW  -->
             <form id="letterForm" action="<?php echo $baseUrl; ?>/controller/create-letter/process-create.php" method="POST" enctype="multipart/form-data" onsubmit="tinymce.triggerSave();">
                 <div id="view-create" class="row g-5">

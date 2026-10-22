@@ -17,9 +17,9 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         mysqli_stmt_bind_param($stmt, "s", $word);
 
         if (mysqli_stmt_execute($stmt)) {
-            $_SESSION['success'] = 'Kata terlarang berhasil ditambahkan!';
+            $_SESSION['success'] = 'Forbidden word has been added successfully.';
         } else {
-            $_SESSION['error'] = 'Kata tersebut sudah ada dalam daftar!';
+            $_SESSION['error'] = 'The word is already in the list.';
         }
         mysqli_stmt_close($stmt);
     }
@@ -30,7 +30,7 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         mysqli_stmt_bind_param($stmt, "i", $id);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_close($stmt);
-        $_SESSION['success'] = 'Kata terlarang berhasil dihapus!';
+        $_SESSION['success'] = 'Forbidden word has been deleted successfully.';
     }
 }
 
