@@ -61,7 +61,7 @@ $categoriesResult = mysqli_query($conn, "SELECT id, name FROM categories");
                         <div class="mb-4">
                             <label class="form-label fw-bold text-dark mb-2">Category (Optional)</label>
                             <select class="form-select fw-medium" name="category_id">
-                                <option value="" disabled selected>Pilih Kategori Surat</option>
+                                <option value="" disabled selected>Choose Category</option>
                                 <?php while ($cat = mysqli_fetch_assoc($categoriesResult)): ?>
                                     <option value="<?= $cat['id']; ?>"><?= htmlspecialchars($cat['name']); ?></option>
                                 <?php endwhile; ?>
