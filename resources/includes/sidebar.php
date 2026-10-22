@@ -19,13 +19,13 @@
         <div class="text-uppercase text-muted fw-bold my-4" style="font-size: 11px; letter-spacing: 1px;">Workspace</div>
 
         <div class="nav flex-column">
-            <a href="home.php" class="nav-link-custom <?= basename($_SERVER['PHP_SELF']) == 'home.php' ? 'active' : '' ?>">
+            <a href="<?= $baseUrl; ?>/resources/views/home.php" class="nav-link-custom <?= basename($_SERVER['PHP_SELF']) == 'home.php' ? 'active' : '' ?>">
                 <i class="bi bi-house fs-5 me-3"></i> Home
             </a>
-            <a href="create.php" class="nav-link-custom <?= basename($_SERVER['PHP_SELF']) == 'create.php' ? 'active' : '' ?>">
+            <a href="<?= $baseUrl; ?>/resources/views/create.php" class="nav-link-custom <?= basename($_SERVER['PHP_SELF']) == 'create.php' ? 'active' : '' ?>">
                 <i class="bi bi-pencil fs-5 me-3"></i> Create
             </a>
-            <a href="my-letter.php" class="nav-link-custom <?= basename($_SERVER['PHP_SELF']) == 'my-letter.php' ? 'active' : '' ?>">
+            <a href="<?= $baseUrl; ?>/resources/views/my-letter.php" class="nav-link-custom <?= basename($_SERVER['PHP_SELF']) == 'my-letter.php' ? 'active' : '' ?>">
                 <i class="bi bi-envelope-paper fs-5 me-3"></i> My Letter
             </a>
 
