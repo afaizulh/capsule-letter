@@ -12,7 +12,8 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
 
 $errors = [];
 
-$user_id = 1;
+// $user_id = 1;
+$user_id = $_SESSION['user_id'];
 $title = trim($_POST['title'] ?? '');
 // $category_id = intval($_POST['category_id'] ?? 0);
 $category_id = intval($_POST['category_id'] ?? null);
