@@ -22,7 +22,7 @@ $unlock_date = trim($_POST['unlock_date'] ?? '');
 $is_public = intval($_POST['is_public'] ?? 0); // 0 untuk Private, 1 untuk Publik
 
 if (empty($title)) $errors[] = 'You have to fill the title.';
-if (empty($category_id)) $errors[] = 'Category must be selected.';
+// if (empty($category_id)) $errors[] = 'Category must be selected.';
 if (empty($content)) $errors[] = 'You have to fill the content.';
 if (empty($unlock_date)) $errors[] = 'You have to select an opening date.';
 
