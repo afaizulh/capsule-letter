@@ -1,0 +1,125 @@
+
+/* SAVE CHANGES CONFIRMATION MODAL */
+
+.update-confirm-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 16px;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+/* Modal harus tersembunyi sebelum dipanggil */
+.update-confirm-overlay[hidden] {
+    display: none !important;
+}
+
+/* Kotak konfirmasi */
+.update-confirm-box {
+    width: 100%;
+    max-width: 560px;
+    padding: 32px 28px;
+
+    background: #fff;
+    color: #000;
+    border: 2px solid #000;
+    border-radius: 8px;
+
+    text-align: center;
+}
+
+.update-confirm-icon {
+    font-size: 64px;
+    line-height: 1;
+    margin-bottom: 16px;
+}
+
+.update-confirm-box h2 {
+    margin: 0 0 10px;
+    font-size: clamp(28px, 4vw, 38px);
+    font-weight: 600;
+}
+
+.update-confirm-box p {
+    margin: 0;
+    font-size: clamp(16px, 2vw, 22px);
+    line-height: 1.4;
+}
+
+.update-confirm-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 32px;
+}
+
+.update-confirm-actions button {
+    flex: 1;
+    min-height: 54px;
+    padding: 12px 16px;
+
+    border: 2px solid #000;
+    border-radius: 10px;
+
+    font-size: clamp(16px, 2vw, 22px);
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.update-confirm-actions .confirm-continue {
+    background: #000;
+    color: #fff;
+    border-color: #000;
+
+    transition:
+        background-color 0.12s ease-out,
+        color 0.12s ease-out,
+        border-color 0.12s ease-out,
+        transform 0.12s ease-out;
+}
+
+.update-confirm-actions .confirm-continue:hover {
+    background: #00FA9A;
+    /* color: #000; */
+    border-color: #00FA9A;
+}
+
+.update-confirm-actions .confirm-cancel {
+    background: #fff;
+    color: #000;
+
+    transition:
+        background-color 0.12s ease-out,
+        color 0.12s ease-out;
+}
+
+.update-confirm-actions .confirm-cancel:hover {
+    background: #e5e5e5;
+    color: #000;
+}
+
+.update-confirm-actions button:focus-visible {
+    outline: 3px solid #777;
+    outline-offset: 3px;
+}
+
+/* Tampilan mobile */
+@media (max-width: 520px) {
+    .update-confirm-box {
+        padding: 24px 18px;
+    }
+
+    .update-confirm-icon {
+        font-size: 52px;
+    }
+
+    .update-confirm-actions {
+        gap: 12px;
+        margin-top: 24px;
+    }
+}
