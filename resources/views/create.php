@@ -1,11 +1,18 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
 
 // Cek apakah user sudah login atau belum
-// if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-//     header('Location: login.php');
-//     exit;
-// }
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header('Location: /capsule-letter/resources/views/auth/login.php');
+    exit;
+}
+
+$conn = require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/database.php';
+$categoriesResult = mysqli_query($conn, "SELECT id, name FROM categories");
 ?>
 
 <!DOCTYPE html>
@@ -13,6 +20,9 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
 
 <head>
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/head.php'; ?>
+
+    <!-- CDN TinyMCE -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
 </head>
 
 <body>
@@ -25,7 +35,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
 
         <!-- Top Navigation / Header -->
         <header class="p-4 border-bottom d-flex justify-content-between align-items-center bg-white">
-            <span class="text-uppercase text-secondary fw-semibold" id="topBadge" style="font-size: 12px; letter-spacing: 1.5px;">CREATE</span>
+            <span class="text-uppercase text-secondary fw-semibold" id="topBadge" style="font-size: 12px; letter-spacing: 1.5px;">CREATE LETTER</span>
             <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/profile-badge.php'; ?>
         </header>
 
@@ -33,90 +43,109 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
         <main class="container-fluid p-4 p-md-5 flex-grow-1" id="mainViewContainer">
 
             <!-- CREATE VIEW  -->
-            <form id="letterForm" action="<?php echo $baseUrl; ?>/controller/create-letter/process-create.php" method="POST">
-            <div id="view-create" class="row g-5">
-                <div class="col-lg-7 col-xl-8">
-                    <div class="mb-4">
-                        <h1 class="display-5 fw-bold mb-2">A Letter to My Future Self.</h1>
-                        <p class="text-muted fs-6">Preserving This Strory for the Future</p>
-                    </div>
-
-
-                    <div class="mb-4">
-                        <label class="form-label fw-bold text-dark mb-2">Letter Title</label>
-                        <input type="text" class="form-control fw-medium" id="title" name="title" placeholder="Input Title" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label fw-bold text-dark mb-2">Content of Letter</label>
-                        <textarea class="form-control" id="content" name="content" rows="10" placeholder="Input Content" required></textarea>
-                    </div>
-
-                    <!-- Helper Notes -->
-                    <div class="text-muted" style="font-size: 12px; line-height: 1.6;">
-                        <div>Before locking the letter <i class="bi bi-info-circle"></i></div>
-                        <div>Edit available for 3 days after creation.</div>
-                        <div>Deletion available for 7 days after creation.</div>
-                        <div>Editing the letter does not reset the deadline.</div>
-                    </div>
-
-                </div>
-
-                <!-- Right Column: Settings & Submit -->
-                <div class="col-lg-5 col-xl-4 d-flex flex-column justify-content-between">
-                    <div>
-                        <!-- Opening Date -->
+            <form id="letterForm" action="<?php echo $baseUrl; ?>/controller/create-letter/process-create.php" method="POST" enctype="multipart/form-data" onsubmit="tinymce.triggerSave();">
+                <div id="view-create" class="row g-5">
+                    <div class="col-lg-7 col-xl-8">
                         <div class="mb-4">
-                            <label class="form-label fw-bold text-dark mb-2">Opening Date</label>
-                            <div class="input-group">
-                                <input type="date" class="form-control fw-medium" id="unlock_date" name="unlock_date" placeholder="Select Date" required>
-                            </div>
-                            <div class="form-text text-muted mt-1" style="font-size: 12px;">The letter is locked until this date.</div>
+                            <h1 class="display-5 fw-bold mb-2">A Letter to My Future Self.</h1>
+                            <p class="text-muted fs-6">Preserving This Strory for the Future</p>
                         </div>
 
-                        <!-- Method Selection -->
+                        <!-- Letter Title -->
                         <div class="mb-4">
-                            <label class="form-label fw-bold text-dark mb-2">Method</label>
+                            <label class="form-label fw-bold text-dark mb-2">Letter Title</label>
+                            <input type="text" class="form-control fw-medium" id="title" name="title" placeholder="Input Title" required>
+                        </div>
 
-                            <!-- Private Option -->
-                            <div class="method-card active p-3 mb-3 d-flex align-items-center justify-content-between" onclick="selectMethod('private')" id="cardPrivate">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="form-check m-0">
-                                        <input class="form-check-input" type="radio" name="is_public" value="0" id="radioPrivate" checked>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="bi bi-lock fs-4 text-dark"></i>
-                                        <span class="fw-bold">Private</span>
-                                    </div>
+                        <!-- Category Selection -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark mb-2">Category (Optional)</label>
+                            <select class="form-select fw-medium" name="category_id">
+                                <option value="" disabled selected>Pilih Kategori Surat</option>
+                                <?php while ($cat = mysqli_fetch_assoc($categoriesResult)): ?>
+                                    <option value="<?= $cat['id']; ?>"><?= htmlspecialchars($cat['name']); ?></option>
+                                <?php endwhile; ?>
+                            </select>
+                        </div>
+
+                        <!-- Content with TinyMCE -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold text-dark mb-2">Content of Letter</label>
+                            <textarea class="form-control" id="content" name="content" rows="10" placeholder="Input Content"></textarea>
+                        </div>
+
+                        <!-- File / Image Attachment -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-dark mb-2">Attachment (Image / Document (Optional))</label>
+                            <input type="file" class="form-control" name="attachment" accept="image/*,.pdf,.doc,.docx">
+                            <div class="form-text text-muted" style="font-size: 11px;">Supported formats: JPG, PNG, PDF, DOC (Max. 2MB)</div>
+                        </div>
+
+                        <!-- Helper Notes -->
+                        <div class="text-muted" style="font-size: 12px; line-height: 1.6;">
+                            <div>Before locking the letter <i class="bi bi-info-circle"></i></div>
+                            <div>Edit available for 3 days after creation.</div>
+                            <div>Deletion available for 7 days after creation.</div>
+                            <div>Editing the letter does not reset the deadline.</div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Column: Settings & Submit -->
+                    <div class="col-lg-5 col-xl-4 d-flex flex-column justify-content-between">
+                        <div>
+                            <!-- Opening Date -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark mb-2">Opening Date</label>
+                                <div class="input-group">
+                                    <input type="date" class="form-control fw-medium" id="unlock_date" name="unlock_date" placeholder="Select Date" required>
                                 </div>
+                                <div class="form-text text-muted mt-1" style="font-size: 12px;">The letter is locked until this date.</div>
                             </div>
 
-                            <!-- Public Option -->
-                            <div class="method-card p-3 d-flex align-items-center justify-content-between" onclick="selectMethod('public')" id="cardPublic">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="form-check m-0">
-                                        <input class="form-check-input" type="radio" name="is_public" value="1" id="radioPublic">
+                            <!-- Method Selection -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold text-dark mb-2">Method</label>
+
+                                <!-- Private Option -->
+                                <div class="method-card active p-3 mb-3 d-flex align-items-center justify-content-between" onclick="selectMethod('private')" id="cardPrivate">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="form-check m-0">
+                                            <input class="form-check-input" type="radio" name="is_public" value="0" id="radioPrivate" checked>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-lock fs-4 text-dark"></i>
+                                            <span class="fw-bold">Private</span>
+                                        </div>
                                     </div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="bi bi-globe fs-4 text-dark"></i>
-                                        <div>
-                                            <div class="fw-bold lh-1">Public</div>
-                                            <small class="text-muted" style="font-size: 10px;">But Anonymous</small>
+                                </div>
+
+                                <!-- Public Option -->
+                                <div class="method-card p-3 d-flex align-items-center justify-content-between" onclick="selectMethod('public')" id="cardPublic">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="form-check m-0">
+                                            <input class="form-check-input" type="radio" name="is_public" value="1" id="radioPublic">
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-globe fs-4 text-dark"></i>
+                                            <div>
+                                                <div class="fw-bold lh-1">Public</div>
+                                                <small class="text-muted" style="font-size: 10px;">But Anonymous</small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Submit Button -->
-                    <div class="mt-4">
-                        <button type="submit" class="btn btn-sent w-100 shadow-sm">
-                            Sent to Future
-                        </button>
+                        <!-- Submit Button -->
+                        <div class="mt-4">
+                            <button type="submit" class="btn btn-sent w-100 shadow-sm">
+                                Sent to Future
+                            </button>
+                        </div>
                     </div>
                 </div>
-            </div>
             </form>
         </main>
 
@@ -127,6 +156,14 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/scripts.php'; ?>
 
     <script>
+        tinymce.init({
+            selector: '#content',
+            height: 300,
+            plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
+            toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat',
+            menubar: false
+        });
+
         document.addEventListener('DOMContentLoaded', function() {
             const unlockInput = document.getElementById('unlock_date');
             const unlockBtn = document.getElementById('unlockDateButton');

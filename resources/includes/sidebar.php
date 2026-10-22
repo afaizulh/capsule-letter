@@ -28,6 +28,13 @@
             <a href="my-letter.php" class="nav-link-custom <?= basename($_SERVER['PHP_SELF']) == 'my-letter.php' ? 'active' : '' ?>">
                 <i class="bi bi-envelope-paper fs-5 me-3"></i> My Letter
             </a>
+
+            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                <div class="text-uppercase text-danger fw-bold my-2" style="font-size: 10px; letter-spacing: 1px;">Administrator</div>
+                <a href="<?= $baseUrl; ?>/resources/views/admin/dashboard.php" class="nav-link-custom <?= basename($_SERVER['PHP_SELF']) == 'dashboard.php' ? 'active' : '' ?>">
+                    <i class="bi bi-speedometer2 fs-5 me-3 text-danger"></i> Admin Panel
+                </a>
+            <?php endif; ?>
         </div>
     </div>
 
