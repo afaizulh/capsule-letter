@@ -43,13 +43,13 @@ try {
     mysqli_set_charset($conn, 'utf8mb4');
     mysqli_query($conn, "SET time_zone = '+07:00'");
 
+    // SQL BARU: Mengizinkan surat sendiri ATAU surat publik milik orang lain
     $stmt = mysqli_prepare(
         $conn,
-        "SELECT id, title, content, attachment,
-                unlock_date, created_at, is_public
-         FROM letters
-         WHERE id = ? AND user_id = ?
-         LIMIT 1"
+        "SELECT id, title, content, attachment, unlock_date, created_at, is_public, user_id
+     FROM letters
+     WHERE id = ? AND (user_id = ? OR is_public = 1)
+     LIMIT 1"
     );
 
     mysqli_stmt_bind_param($stmt, 'ii', $letterId, $userId);
@@ -57,7 +57,6 @@ try {
 
     $result = mysqli_stmt_get_result($stmt);
     $letter = mysqli_fetch_assoc($result);
-
     mysqli_stmt_close($stmt);
 } catch (Throwable $error) {
     error_log('Detail Letter: ' . $error->getMessage());
@@ -119,7 +118,7 @@ if (isset($_GET['download']) && $_GET['download'] === '1') {
 
     $uploadDirectory = realpath(
         $_SERVER['DOCUMENT_ROOT']
-        . '/capsule-letter/resources/uploads'
+            . '/capsule-letter/resources/uploads'
     );
 
     if ($uploadDirectory === false) {
@@ -144,7 +143,12 @@ if (isset($_GET['download']) && $_GET['download'] === '1') {
     $extension = strtolower(pathinfo($attachment, PATHINFO_EXTENSION));
 
     $allowedExtensions = [
-        'jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'
+        'jpg',
+        'jpeg',
+        'png',
+        'pdf',
+        'doc',
+        'docx'
     ];
 
     if (!in_array($extension, $allowedExtensions, true)) {
@@ -191,7 +195,7 @@ if (isset($_GET['download']) && $_GET['download'] === '1') {
     header('Content-Length: ' . filesize($filePath));
     header(
         'Content-Disposition: ' . $disposition
-        . '; filename="' . $attachment . '"'
+            . '; filename="' . $attachment . '"'
     );
     header('Cache-Control: private, no-store');
 
@@ -424,11 +428,11 @@ $sanitizeLetterHtml = static function (string $html): string {
                                     <?php if ($isOpen): ?>
                                         <a
                                             href="<?= $escape(
-                                                $baseUrl
-                                                . '/resources/views/detail-letter.php?id='
-                                                . (int) $letter['id']
-                                                . '&download=1'
-                                            ) ?>"
+                                                        $baseUrl
+                                                            . '/resources/views/detail-letter.php?id='
+                                                            . (int) $letter['id']
+                                                            . '&download=1'
+                                                    ) ?>"
                                             class="btn btn-outline-dark"
                                             target="_blank"
                                             rel="noopener noreferrer">
@@ -451,6 +455,23 @@ $sanitizeLetterHtml = static function (string $html): string {
                     <!-- BAGIAN KOMENTAR -->
                     <div class="mt-5 pt-4 border-top">
                         <h3 class="h5 fw-bold mb-4"><i class="bi bi-chat-dots me-2"></i>Comments</h3>
+
+                        <!-- ALERT -->
+                        <?php if (isset($_SESSION['success'])): ?>
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                <?= $_SESSION['success'];
+                                unset($_SESSION['success']); ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+                        <?php if (isset($_SESSION['error'])): ?>
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                <?= $_SESSION['error'];
+                                unset($_SESSION['error']); ?>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        <?php endif; ?>
+                        <!-- END ALERT -->
 
                         <!-- Form Kirim Komentar (Hanya muncul jika surat publik & sudah terbuka) -->
                         <?php if ((int)$letter['is_public'] === 1 && $isOpen): ?>
