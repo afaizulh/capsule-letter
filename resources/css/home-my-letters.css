@@ -1,0 +1,46 @@
+
+/* My Letters - Scrollable List */
+.my-letters-viewport {
+    max-height: 360px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: #c8c8c8 transparent;
+}
+
+.my-letters-list {
+    width: 100%;
+}
+
+.my-letter-item {
+    display: block;
+    padding: 14px 4px;
+    border-bottom: 1px solid #eeeeee;
+    transition: background-color 0.2s ease;
+}
+
+.my-letter-item:hover {
+    background-color: #fafafa;
+}
+
+.my-letter-item:last-child {
+    border-bottom: none;
+}
+
+/* Chrome, Edge, Safari */
+.my-letters-viewport::-webkit-scrollbar {
+    width: 6px;
+}
+
+.my-letters-viewport::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.my-letters-viewport::-webkit-scrollbar-thumb {
+    background: #c8c8c8;
+    border-radius: 10px;
+}
+
+.my-letters-viewport::-webkit-scrollbar-thumb:hover {
+    background: #999999;
+}

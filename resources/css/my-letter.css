@@ -51,7 +51,7 @@
 /* Khusus Ready to open menjadi hitam. */
 #letterList .letter-card:hover .letter-status.text-success,
 #letterList .letter-card:focus-within .letter-status.text-success {
-    color: #000 !important;
+    color: #ffffff !important;
 }
 
 /* Matikan animasi jika pengguna memilih pengurangan gerakan. */

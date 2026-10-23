@@ -1,4 +1,5 @@
 <?php
+ob_start();
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -96,6 +97,107 @@ $unlockDate = new DateTimeImmutable(
 );
 
 $isOpen = $now >= $unlockDate;
+
+if (isset($_GET['download']) && $_GET['download'] === '1') {
+
+    // Surat harus sudah melewati waktu pembukaan.
+    if (!$isOpen) {
+        http_response_code(403);
+        exit('This letter is still locked.');
+    }
+
+    $attachment = $letter['attachment'] ?? '';
+
+    if (
+        !is_string($attachment) ||
+        $attachment === '' ||
+        basename($attachment) !== $attachment
+    ) {
+        http_response_code(404);
+        exit('Attachment not found.');
+    }
+
+    $uploadDirectory = realpath(
+        $_SERVER['DOCUMENT_ROOT']
+        . '/capsule-letter/resources/uploads'
+    );
+
+    if ($uploadDirectory === false) {
+        http_response_code(404);
+        exit('Upload directory not found.');
+    }
+
+    $filePath = realpath(
+        $uploadDirectory . DIRECTORY_SEPARATOR . $attachment
+    );
+
+    if (
+        $filePath === false ||
+        dirname($filePath) !== $uploadDirectory ||
+        !is_file($filePath) ||
+        !is_readable($filePath)
+    ) {
+        http_response_code(404);
+        exit('Attachment not found.');
+    }
+
+    $extension = strtolower(pathinfo($attachment, PATHINFO_EXTENSION));
+
+    $allowedExtensions = [
+        'jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'
+    ];
+
+    if (!in_array($extension, $allowedExtensions, true)) {
+        http_response_code(415);
+        exit('Unsupported attachment type.');
+    }
+
+    $finfo = new finfo(FILEINFO_MIME_TYPE);
+    $mimeType = $finfo->file($filePath);
+
+    $allowedMimeTypes = [
+        'jpg'  => ['image/jpeg'],
+        'jpeg' => ['image/jpeg'],
+        'png'  => ['image/png'],
+        'pdf'  => ['application/pdf'],
+        'doc'  => ['application/msword'],
+        'docx' => [
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ]
+    ];
+
+    if (
+        $mimeType === false ||
+        !in_array($mimeType, $allowedMimeTypes[$extension], true)
+    ) {
+        http_response_code(415);
+        exit('Invalid attachment type.');
+    }
+
+    // Gambar dan PDF bisa dibuka di browser.
+    // Dokumen Word akan diunduh.
+    $disposition = in_array(
+        $extension,
+        ['jpg', 'jpeg', 'png', 'pdf'],
+        true
+    ) ? 'inline' : 'attachment';
+
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+
+    header('Content-Type: ' . $mimeType);
+    header('X-Content-Type-Options: nosniff');
+    header('Content-Length: ' . filesize($filePath));
+    header(
+        'Content-Disposition: ' . $disposition
+        . '; filename="' . $attachment . '"'
+    );
+    header('Cache-Control: private, no-store');
+
+    readfile($filePath);
+    exit;
+}
 
 // 6. Helper untuk menampilkan teks secara aman.
 $escape = static function ($value): string {
@@ -319,10 +421,27 @@ $sanitizeLetterHtml = static function (string $html): string {
                                 <div class="mt-4">
                                     <h2 class="h5 fw-bold mb-3">Attachment</h2>
 
-                                    <p class="mb-0">
-                                        <i class="bi bi-paperclip me-2"></i>
-                                        <?= $escape(basename($letter['attachment'])) ?>
-                                    </p>
+                                    <?php if ($isOpen): ?>
+                                        <a
+                                            href="<?= $escape(
+                                                $baseUrl
+                                                . '/resources/views/detail-letter.php?id='
+                                                . (int) $letter['id']
+                                                . '&download=1'
+                                            ) ?>"
+                                            class="btn btn-outline-dark"
+                                            target="_blank"
+                                            rel="noopener noreferrer">
+
+                                            <i class="bi bi-paperclip me-2"></i>
+                                            Open Attachment
+                                        </a>
+                                    <?php else: ?>
+                                        <p class="text-secondary mb-0">
+                                            <i class="bi bi-lock me-2"></i>
+                                            Attachment is locked until the unlock date.
+                                        </p>
+                                    <?php endif; ?>
                                 </div>
                             <?php endif; ?>
 
