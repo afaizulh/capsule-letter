@@ -1,4 +1,3 @@
-
 <?php
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -79,7 +78,7 @@ try {
 
         header(
             'Location: ' . $baseUrl
-            . '/resources/views/my-letter.php'
+                . '/resources/views/my-letter.php'
         );
         exit;
     }
@@ -94,7 +93,6 @@ try {
         $categoriesResult,
         MYSQLI_ASSOC
     );
-
 } catch (mysqli_sql_exception $error) {
     error_log('Update Letter: ' . $error->getMessage());
 
@@ -142,7 +140,7 @@ $attachment = (string) ($letter['attachment'] ?? '');
                        justify-content-between align-items-center bg-white">
 
             <span class="text-uppercase text-secondary fw-semibold"
-                  style="font-size: 12px; letter-spacing: 1.5px;">
+                style="font-size: 12px; letter-spacing: 1.5px;">
                 UPDATE LETTER
             </span>
 
@@ -168,9 +166,9 @@ $attachment = (string) ($letter['attachment'] ?? '');
             <form
                 id="updateLetterForm"
                 action="<?= $escape(
-                    $baseUrl
-                    . '/controller/update-letter/process-update.php'
-                ) ?>"
+                            $baseUrl
+                                . '/controller/update-letter/process-update.php'
+                        ) ?>"
                 method="POST"
                 enctype="multipart/form-data">
 
@@ -192,7 +190,7 @@ $attachment = (string) ($letter['attachment'] ?? '');
                         <!-- TITLE -->
                         <div class="mb-4">
                             <label for="title"
-                                   class="form-label fw-bold">
+                                class="form-label fw-bold">
                                 Letter Title
                             </label>
 
@@ -210,7 +208,7 @@ $attachment = (string) ($letter['attachment'] ?? '');
                         <!-- CATEGORY -->
                         <div class="mb-4">
                             <label for="category_id"
-                                   class="form-label fw-bold">
+                                class="form-label fw-bold">
                                 Category (Optional)
                             </label>
 
@@ -242,7 +240,7 @@ $attachment = (string) ($letter['attachment'] ?? '');
                         <!-- CONTENT -->
                         <div class="mb-4">
                             <label for="content"
-                                   class="form-label fw-bold">
+                                class="form-label fw-bold">
                                 Content of Letter
                             </label>
 
@@ -258,7 +256,7 @@ $attachment = (string) ($letter['attachment'] ?? '');
                         <!-- ATTACHMENT -->
                         <div class="mb-4">
                             <label for="attachment"
-                                   class="form-label fw-bold">
+                                class="form-label fw-bold">
                                 Attachment
                             </label>
 
@@ -342,7 +340,7 @@ $attachment = (string) ($letter['attachment'] ?? '');
                             <!-- OPENING DATE -->
                             <div class="mb-4">
                                 <label for="unlock_date"
-                                       class="form-label fw-bold">
+                                    class="form-label fw-bold">
                                     Opening Date
                                 </label>
 
@@ -352,12 +350,12 @@ $attachment = (string) ($letter['attachment'] ?? '');
                                     id="unlock_date"
                                     name="unlock_date"
                                     value="<?= $escape(
-                                        substr(
-                                            (string) $letter['unlock_date'],
-                                            0,
-                                            10
-                                        )
-                                    ) ?>"
+                                                substr(
+                                                    (string) $letter['unlock_date'],
+                                                    0,
+                                                    10
+                                                )
+                                            ) ?>"
                                     required>
 
                                 <div class="form-text">
@@ -382,8 +380,8 @@ $attachment = (string) ($letter['attachment'] ?? '');
                                     role="button"
                                     tabindex="0"
                                     aria-pressed="<?= (int) $letter['is_public'] === 0
-                                        ? 'true'
-                                        : 'false' ?>">
+                                                        ? 'true'
+                                                        : 'false' ?>">
 
                                     <div class="d-flex align-items-center gap-3">
                                         <input
@@ -414,8 +412,8 @@ $attachment = (string) ($letter['attachment'] ?? '');
                                     role="button"
                                     tabindex="0"
                                     aria-pressed="<?= (int) $letter['is_public'] === 1
-                                        ? 'true'
-                                        : 'false' ?>">
+                                                        ? 'true'
+                                                        : 'false' ?>">
 
                                     <div class="d-flex align-items-center gap-3">
                                         <input
@@ -455,9 +453,9 @@ $attachment = (string) ($letter['attachment'] ?? '');
 
                                 <a
                                     href="<?= $escape(
-                                        $baseUrl
-                                        . '/resources/views/my-letter.php'
-                                    ) ?>"
+                                                $baseUrl
+                                                    . '/resources/views/my-letter.php'
+                                            ) ?>"
                                     class="btn btn-outline-dark w-100 mt-2">
 
                                     Cancel
@@ -476,9 +474,9 @@ $attachment = (string) ($letter['attachment'] ?? '');
         <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/footer.php'; ?>
 
     </div>
-    
+
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/scripts.php'; ?>
-    
+
     <!-- SAVE CHANGES CONFIRMATION MODAL -->
     <div class="update-confirm-overlay"
         id="saveUpdateModal"
@@ -501,14 +499,14 @@ $attachment = (string) ($letter['attachment'] ?? '');
 
             <div class="update-confirm-actions">
                 <button type="button"
-                        class="confirm-cancel"
-                        id="cancelSaveUpdate">
+                    class="confirm-cancel"
+                    id="cancelSaveUpdate">
                     Cancel
                 </button>
 
                 <button type="button"
-                        class="confirm-continue"
-                        id="confirmSaveUpdate">
+                    class="confirm-continue"
+                    id="confirmSaveUpdate">
                     Continue
                 </button>
             </div>
@@ -555,23 +553,23 @@ $attachment = (string) ($letter['attachment'] ?? '');
 
         document.getElementById('cardPrivate').addEventListener(
             'click',
-            function () {
+            function() {
                 selectMethod('private');
             }
         );
 
         document.getElementById('cardPublic').addEventListener(
             'click',
-            function () {
+            function() {
                 selectMethod('public');
             }
         );
 
         // Keyboard support for visibility cards
-        ['cardPrivate', 'cardPublic'].forEach(function (id) {
+        ['cardPrivate', 'cardPublic'].forEach(function(id) {
             document.getElementById(id).addEventListener(
                 'keydown',
-                function (event) {
+                function(event) {
                     if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault();
 
@@ -583,7 +581,7 @@ $attachment = (string) ($letter['attachment'] ?? '');
             );
         });
 
-        
+
         const updateForm = document.getElementById('updateLetterForm');
         const saveModal = document.getElementById('saveUpdateModal');
 
@@ -593,7 +591,7 @@ $attachment = (string) ($letter['attachment'] ?? '');
         let saveConfirmed = false;
 
         // Validasi dan tampilkan modal sebelum submit.
-        updateForm.addEventListener('submit', function (event) {
+        updateForm.addEventListener('submit', function(event) {
             if (typeof tinymce !== 'undefined') {
                 tinymce.triggerSave();
             }
@@ -615,12 +613,12 @@ $attachment = (string) ($letter['attachment'] ?? '');
         });
 
         // Cancel hanya menutup modal.
-        cancelSaveUpdate.addEventListener('click', function () {
+        cancelSaveUpdate.addEventListener('click', function() {
             saveModal.hidden = true;
         });
 
         // Continue mengirim form ke process-update.php.
-        confirmSaveUpdate.addEventListener('click', function () {
+        confirmSaveUpdate.addEventListener('click', function() {
             saveConfirmed = true;
 
             if (typeof tinymce !== 'undefined') {
@@ -631,20 +629,20 @@ $attachment = (string) ($letter['attachment'] ?? '');
         });
 
         // Klik area gelap untuk menutup modal.
-        saveModal.addEventListener('click', function (event) {
+        saveModal.addEventListener('click', function(event) {
             if (event.target === saveModal) {
                 saveModal.hidden = true;
             }
         });
 
         // Tombol Escape untuk menutup modal.
-        document.addEventListener('keydown', function (event) {
+        document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape' && !saveModal.hidden) {
                 saveModal.hidden = true;
             }
         });
-
     </script>
 
 </body>
+
 </html>

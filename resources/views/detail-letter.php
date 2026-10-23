@@ -1,4 +1,3 @@
-
 <?php
 
 if (session_status() === PHP_SESSION_NONE) {
@@ -59,14 +58,27 @@ try {
     $letter = mysqli_fetch_assoc($result);
 
     mysqli_stmt_close($stmt);
-    mysqli_close($conn);
-
 } catch (Throwable $error) {
     error_log('Detail Letter: ' . $error->getMessage());
 
     http_response_code(500);
     exit('The letter could not be loaded. Please try again later.');
 }
+
+// Ambil komentar untuk surat ini beserta nama usernya
+$commentsQuery = "SELECT c.comment, c.created_at, u.email as user_email 
+                  FROM comments c 
+                  JOIN users u ON c.user_id = u.id 
+                  WHERE c.letter_id = ? 
+                  ORDER BY c.created_at DESC";
+$stmtComm = mysqli_prepare($conn, $commentsQuery);
+mysqli_stmt_bind_param($stmtComm, 'i', $letterId);
+mysqli_stmt_execute($stmtComm);
+$commentsResult = mysqli_stmt_get_result($stmtComm);
+$comments = mysqli_fetch_all($commentsResult, MYSQLI_ASSOC);
+mysqli_stmt_close($stmtComm);
+
+mysqli_close($conn);
 
 // 4. Pastikan surat ditemukan.
 if (!$letter) {
@@ -97,8 +109,17 @@ $escape = static function ($value): string {
 
 $sanitizeLetterHtml = static function (string $html): string {
     $allowedTags = [
-        'p', 'br', 'strong', 'b', 'em', 'i', 'u',
-        'ul', 'ol', 'li', 'blockquote'
+        'p',
+        'br',
+        'strong',
+        'b',
+        'em',
+        'i',
+        'u',
+        'ul',
+        'ol',
+        'li',
+        'blockquote'
     ];
 
     $previousLibxml = libxml_use_internal_errors(true);
@@ -107,8 +128,8 @@ $sanitizeLetterHtml = static function (string $html): string {
 
     $dom->loadHTML(
         '<?xml encoding="UTF-8"><div id="letter-content">'
-        . $html
-        . '</div>',
+            . $html
+            . '</div>',
         LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD
     );
 
@@ -176,12 +197,12 @@ $sanitizeLetterHtml = static function (string $html): string {
     return $output;
 };
 
-
 ?>
 
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/head.php'; ?>
     <title>Letter Details | Capsule Letter</title>
@@ -193,7 +214,7 @@ $sanitizeLetterHtml = static function (string $html): string {
     <div class="main-content">
         <header class="p-4 border-bottom d-flex justify-content-between align-items-center bg-white">
             <span class="text-uppercase text-secondary fw-semibold"
-                  style="font-size: 12px; letter-spacing: 1.5px;">
+                style="font-size: 12px; letter-spacing: 1.5px;">
                 LETTER DETAILS
             </span>
 
@@ -205,7 +226,7 @@ $sanitizeLetterHtml = static function (string $html): string {
                 <div class="col-12 col-xl-9">
 
                     <a href="<?= $escape($baseUrl . '/resources/views/my-letter.php') ?>"
-                       class="btn btn-outline-dark mb-4">
+                        class="btn btn-outline-dark mb-4">
                         <i class="bi bi-arrow-left me-2"></i>
                         Back to My Letters
                     </a>
@@ -279,7 +300,7 @@ $sanitizeLetterHtml = static function (string $html): string {
 
                             <?php if ($isOpen): ?>
                                 <div class="border rounded-3 p-4"
-                                     style="white-space: pre-wrap; overflow-wrap: anywhere;"><?= $sanitizeLetterHtml($letter['content']) ?></div>
+                                    style="white-space: pre-wrap; overflow-wrap: anywhere;"><?= $sanitizeLetterHtml($letter['content']) ?></div>
                             <?php else: ?>
                                 <div class="border rounded-3 p-4 text-center bg-light">
                                     <i class="bi bi-lock fs-1 text-secondary"></i>
@@ -308,6 +329,47 @@ $sanitizeLetterHtml = static function (string $html): string {
                         </div>
                     </article>
 
+                    <!-- BAGIAN KOMENTAR -->
+                    <div class="mt-5 pt-4 border-top">
+                        <h3 class="h5 fw-bold mb-4"><i class="bi bi-chat-dots me-2"></i>Comments</h3>
+
+                        <!-- Form Kirim Komentar (Hanya muncul jika surat publik & sudah terbuka) -->
+                        <?php if ((int)$letter['is_public'] === 1 && $isOpen): ?>
+                            <form action="/capsule-letter/controller/comment/process-comment.php" method="POST" class="mb-4" onsubmit="tinymce.triggerSave();">
+                                <input type="hidden" name="letter_id" value="<?= $letterId; ?>">
+                                <div class="mb-3">
+                                    <textarea class="form-control tinymce-editor" name="comment" rows="3" placeholder="Write a public comment..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-dark btn-sm px-4">Post Comment</button>
+                            </form>
+                        <?php else: ?>
+                            <p class="text-muted small fst-italic">Comments are disabled for locked or private letters.</p>
+                        <?php endif; ?>
+
+                        <!-- List Komentar -->
+                        <div class="comment-list mt-4">
+                            <?php if (empty($comments)): ?>
+                                <p class="text-muted small">No comments yet. Be the first to comment!</p>
+                            <?php else: ?>
+                                <?php foreach ($comments as $comm): ?>
+                                    <div class="card border-0 bg-light mb-3 rounded-3">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <strong class="small text-dark"><?= $escape(explode('@', $comm['user_email'])[0]); ?></strong>
+                                                <small class="text-muted" style="font-size: 11px;">
+                                                    <?= $escape((new DateTimeImmutable($comm['created_at'], $timezone))->format('d M Y, H:i')); ?>
+                                                </small>
+                                            </div>
+                                            <p class="mb-0 text-break" style="font-size: 14px;">
+                                                <?= $sanitizeLetterHtml($comm['comment']); ?>
+                                            </p>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </main>
@@ -317,4 +379,5 @@ $sanitizeLetterHtml = static function (string $html): string {
 
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/scripts.php'; ?>
 </body>
+
 </html>

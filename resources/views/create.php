@@ -20,9 +20,6 @@ $categoriesResult = mysqli_query($conn, "SELECT id, name FROM categories");
 
 <head>
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/head.php'; ?>
-
-    <!-- CDN TinyMCE -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/6.8.2/tinymce.min.js" referrerpolicy="origin"></script>
 </head>
 
 <body>
@@ -88,7 +85,7 @@ $categoriesResult = mysqli_query($conn, "SELECT id, name FROM categories");
                         <!-- Content with TinyMCE -->
                         <div class="mb-3">
                             <label class="form-label fw-bold text-dark mb-2">Content of Letter</label>
-                            <textarea class="form-control" id="content" name="content" rows="10" placeholder="Input Content"></textarea>
+                            <textarea class="form-control tinymce-editor" id="content" name="content" rows="10" placeholder="Input Content"></textarea>
                         </div>
 
                         <!-- File / Image Attachment -->
@@ -173,14 +170,6 @@ $categoriesResult = mysqli_query($conn, "SELECT id, name FROM categories");
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/scripts.php'; ?>
 
     <script>
-        tinymce.init({
-            selector: '#content',
-            height: 300,
-            plugins: 'advlist autolink lists link image charmap preview anchor searchreplace visualblocks code fullscreen insertdatetime media table help wordcount',
-            toolbar: 'undo redo | formatselect | bold italic underline | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | removeformat',
-            menubar: false
-        });
-
         document.addEventListener('DOMContentLoaded', function() {
             const unlockInput = document.getElementById('unlock_date');
             const unlockBtn = document.getElementById('unlockDateButton');
