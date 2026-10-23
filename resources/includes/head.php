@@ -1,6 +1,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Capsule Letter</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <!-- Bootstrap v5.3 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <!-- Bootstrap Icons -->
@@ -10,9 +16,33 @@
         --sidebar-width: 280px;
         --brand-orange: #FF4500;
     }
+    
+    /* Main typography */
+    body {
+        font-family: 'Space Grotesk', sans-serif;
+    }
+    
+    /* Keep small text using the existing font */
+    small,
+    .small,
+    .form-text,
+    .text-muted,
+    .text-secondary {
+        font-family: Arial, sans-serif;
+    }
+
+    /* Keep letter-writing content using the existing font */
+    textarea,
+    input,
+    select,
+    [contenteditable="true"],
+    .letter-content,
+    .letter-editor {
+        font-family: Arial, sans-serif;
+    }
 
     body {
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        /* font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; */
         background-color: #ffffff;
         color: #000000;
         overflow-x: hidden;

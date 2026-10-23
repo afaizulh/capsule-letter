@@ -1,0 +1,118 @@
+
+/* Public Letter Feed */
+.public-feed-viewport {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+}
+
+.public-feed-track {
+    display: flex;
+    width: max-content;
+    animation: publicLetterSlide 70s linear infinite;
+    will-change: transform;
+}
+
+.public-feed-group {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: stretch;
+    gap: 16px;
+    padding-right: 16px;
+}
+
+.public-letter-card {
+    box-sizing: border-box;
+    flex: 0 0 280px;
+    width: 280px;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    min-height: 225px;
+}
+
+.public-letter-author {
+    color: #777;
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.public-letter-title {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    overflow-wrap: anywhere;
+}
+
+.public-letter-preview {
+    color: #666;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 14px;
+
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+}
+
+.public-letter-link {
+    color: #212121;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-top: auto;
+    align-self: flex-start;
+    transition: color 0.2s ease;
+}
+
+.public-letter-link:hover,
+.public-letter-link:focus-visible {
+    color: #FF00FF;
+}
+
+/* Pause saat pointer berada di feed */
+.public-feed-viewport:hover .public-feed-track,
+.public-feed-viewport:focus-within .public-feed-track {
+    animation-play-state: paused;
+}
+
+/* Loop kontinu */
+@keyframes publicLetterSlide {
+    from {
+        transform: translateX(0);
+    }
+
+    to {
+        transform: translateX(-50%);
+    }
+}
+
+/* Responsif */
+@media (max-width: 900px) {
+    .public-letter-card {
+        flex-basis: 250px;
+        width: 250px;
+    }
+}
+
+@media (max-width: 576px) {
+    .public-letter-card {
+        flex-basis: 78vw;
+        width: 78vw;
+    }
+}
+
+/* Hormati preferensi reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .public-feed-track {
+        animation: none;
+    }
+}

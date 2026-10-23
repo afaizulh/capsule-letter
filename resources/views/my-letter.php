@@ -56,6 +56,39 @@ try {
     $letters = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
     mysqli_stmt_close($stmt);
+
+    
+    // Statistik surat pengguna.
+    $nowSql = (new DateTimeImmutable(
+        'now',
+        new DateTimeZone('Asia/Jakarta')
+    ))->format('Y-m-d H:i:s');
+
+    $stmt = mysqli_prepare(
+        $conn,
+        "SELECT
+            COUNT(*) AS total,
+            COALESCE(SUM(unlock_date > ?), 0) AS locked,
+            COALESCE(SUM(unlock_date <= ?), 0) AS unlocked
+         FROM letters
+         WHERE user_id = ?"
+    );
+
+    mysqli_stmt_bind_param(
+        $stmt,
+        'ssi',
+        $nowSql,
+        $nowSql,
+        $userId
+    );
+
+    mysqli_stmt_execute($stmt);
+
+    $stats = mysqli_fetch_assoc(
+        mysqli_stmt_get_result($stmt)
+    );
+
+    mysqli_stmt_close($stmt);
 } catch (mysqli_sql_exception $error) {
     error_log('My Letter: ' . $error->getMessage());
 
@@ -81,7 +114,7 @@ $letterNow = new DateTimeImmutable('now', $letterTimezone);
 <head>
     <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/head.php'; ?>
     <link rel="stylesheet"
-        href="/capsule-letter/resources/css/my-letter.css?v=4">
+        href="/capsule-letter/resources/css/my-letter.css">
 </head>
 
 <body>
@@ -109,6 +142,41 @@ $letterNow = new DateTimeImmutable('now', $letterTimezone);
                     <p class="text-muted">
                         List of letters you have created for your future self.
                     </p>
+                    
+                    <!-- Letter Statistics -->
+                    <section class="my-4 mb-5">
+                        <div class="row g-4">
+
+                            <div class="col-4 col-md-3">
+                                <p class="text-secondary small mb-1">
+                                    Total Letters
+                                </p>
+                                <h2 class="fw-bold mb-0">
+                                    <?= (int) $stats['total'] ?>
+                                </h2>
+                            </div>
+
+                            <div class="col-4 col-md-3">
+                                <p class="text-secondary small mb-1">
+                                    Locked
+                                </p>
+                                <h2 class="fw-bold mb-0">
+                                    <?= (int) $stats['locked'] ?>
+                                </h2>
+                            </div>
+
+                            <div class="col-4 col-md-3">
+                                <p class="text-secondary small mb-1">
+                                    Unlocked
+                                </p>
+                                <h2 class="fw-bold mb-0">
+                                    <?= (int) $stats['unlocked'] ?>
+                                </h2>
+                            </div>
+
+                        </div>
+                    </section>
+                    <!-- End Letter Statistics -->
                     
                     <!-- UPDATE ALERT -->
                     <?php if ($updateSuccess): ?>
