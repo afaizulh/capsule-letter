@@ -5,6 +5,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+// Token CSRF untuk melindungi aksi Like.
+if (empty($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
+
 require_once $_SERVER['DOCUMENT_ROOT']
     . '/capsule-letter/config/app.php';
 
@@ -36,6 +41,10 @@ if ($userId <= 0 || !$letterId || $letterId <= 0) {
 // 3. Koneksi database dan ambil surat milik user.
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
+$comments = [];
+$likeCount = 0;
+$userHasLiked = false;
+
 try {
     $conn = require $_SERVER['DOCUMENT_ROOT']
         . '/capsule-letter/config/database.php';
@@ -43,13 +52,13 @@ try {
     mysqli_set_charset($conn, 'utf8mb4');
     mysqli_query($conn, "SET time_zone = '+07:00'");
 
-    // SQL BARU: Mengizinkan surat sendiri ATAU surat publik milik orang lain
+    // Pengguna dapat membuka surat miliknya sendiri atau surat yang berstatus Public.
     $stmt = mysqli_prepare(
         $conn,
         "SELECT id, title, content, attachment, unlock_date, created_at, is_public, user_id
-     FROM letters
-     WHERE id = ? AND (user_id = ? OR is_public = 1)
-     LIMIT 1"
+         FROM letters
+         WHERE id = ? AND (user_id = ? OR is_public = 1)
+         LIMIT 1"
     );
 
     mysqli_stmt_bind_param($stmt, 'ii', $letterId, $userId);
@@ -58,32 +67,147 @@ try {
     $result = mysqli_stmt_get_result($stmt);
     $letter = mysqli_fetch_assoc($result);
     mysqli_stmt_close($stmt);
+
+    // Pastikan surat ditemukan sebelum memproses Like atau komentar.
+    if (!$letter) {
+        mysqli_close($conn);
+        http_response_code(404);
+        exit('Letter not found.');
+    }
+
+    // Proses Like hanya diperbolehkan untuk surat Public.
+    if (
+        $_SERVER['REQUEST_METHOD'] === 'POST' &&
+        isset($_POST['toggle_like'])
+    ) {
+        if ((int) $letter['is_public'] !== 1) {
+            $_SESSION['like_feedback'] = [
+                'type' => 'warning',
+                'message' => 'Likes are only available for public letters.'
+            ];
+        } else {
+            $postedToken = $_POST['csrf_token'] ?? '';
+            $sessionToken = $_SESSION['csrf_token'] ?? '';
+
+            if (
+                !is_string($postedToken) ||
+                !is_string($sessionToken) ||
+                $sessionToken === '' ||
+                !hash_equals($sessionToken, $postedToken)
+            ) {
+                $_SESSION['like_feedback'] = [
+                    'type' => 'danger',
+                    'message' => 'Your session has expired. Please try again.'
+                ];
+            } else {
+                // Jika Like sudah ada, hapus. Jika belum, tambahkan.
+                $deleteLike = mysqli_prepare(
+                    $conn,
+                    "DELETE FROM letter_likes
+                     WHERE letter_id = ? AND user_id = ?
+                     LIMIT 1"
+                );
+
+                mysqli_stmt_bind_param(
+                    $deleteLike,
+                    'ii',
+                    $letterId,
+                    $userId
+                );
+                mysqli_stmt_execute($deleteLike);
+
+                $wasLiked = mysqli_stmt_affected_rows($deleteLike) > 0;
+                mysqli_stmt_close($deleteLike);
+
+                if ($wasLiked) {
+                    $_SESSION['like_feedback'] = [
+                        'type' => 'secondary',
+                        'message' => 'You removed your like.'
+                    ];
+                } else {
+                    $insertLike = mysqli_prepare(
+                        $conn,
+                        "INSERT IGNORE INTO letter_likes (letter_id, user_id)
+                         VALUES (?, ?)"
+                    );
+
+                    mysqli_stmt_bind_param(
+                        $insertLike,
+                        'ii',
+                        $letterId,
+                        $userId
+                    );
+                    mysqli_stmt_execute($insertLike);
+
+                    $wasInserted = mysqli_stmt_affected_rows($insertLike) > 0;
+                    mysqli_stmt_close($insertLike);
+
+                    $_SESSION['like_feedback'] = [
+                        'type' => 'success',
+                        'message' => $wasInserted
+                            ? 'You liked this letter.'
+                            : 'You have already liked this letter.'
+                    ];
+                }
+            }
+        }
+
+        mysqli_close($conn);
+
+        // Redirect agar Like tidak terkirim ulang saat halaman di-refresh.
+        header(
+            'Location: ' . $baseUrl
+                . '/resources/views/detail-letter.php?id=' . (int) $letterId
+        );
+        exit;
+    }
+
+    // Ambil jumlah Like dan status Like dari pengguna yang sedang login.
+    if ((int) $letter['is_public'] === 1) {
+        $likeStmt = mysqli_prepare(
+            $conn,
+            "SELECT
+                COUNT(*) AS like_count,
+                COALESCE(MAX(user_id = ?), 0) AS liked_by_user
+             FROM letter_likes
+             WHERE letter_id = ?"
+        );
+
+        mysqli_stmt_bind_param($likeStmt, 'ii', $userId, $letterId);
+        mysqli_stmt_execute($likeStmt);
+
+        $likeResult = mysqli_stmt_get_result($likeStmt);
+        $likeData = mysqli_fetch_assoc($likeResult);
+
+        $likeCount = (int) ($likeData['like_count'] ?? 0);
+        $userHasLiked = (int) ($likeData['liked_by_user'] ?? 0) === 1;
+
+        mysqli_stmt_close($likeStmt);
+    }
+
+    // Ambil komentar untuk surat ini beserta nama usernya.
+    $commentsQuery = "
+        SELECT c.comment, c.created_at, u.email AS user_email
+        FROM comments c
+        JOIN users u ON c.user_id = u.id
+        WHERE c.letter_id = ?
+        ORDER BY c.created_at DESC
+    ";
+
+    $stmtComm = mysqli_prepare($conn, $commentsQuery);
+    mysqli_stmt_bind_param($stmtComm, 'i', $letterId);
+    mysqli_stmt_execute($stmtComm);
+
+    $commentsResult = mysqli_stmt_get_result($stmtComm);
+    $comments = mysqli_fetch_all($commentsResult, MYSQLI_ASSOC);
+
+    mysqli_stmt_close($stmtComm);
+    mysqli_close($conn);
 } catch (Throwable $error) {
     error_log('Detail Letter: ' . $error->getMessage());
 
     http_response_code(500);
     exit('The letter could not be loaded. Please try again later.');
-}
-
-// Ambil komentar untuk surat ini beserta nama usernya
-$commentsQuery = "SELECT c.comment, c.created_at, u.email as user_email 
-                  FROM comments c 
-                  JOIN users u ON c.user_id = u.id 
-                  WHERE c.letter_id = ? 
-                  ORDER BY c.created_at DESC";
-$stmtComm = mysqli_prepare($conn, $commentsQuery);
-mysqli_stmt_bind_param($stmtComm, 'i', $letterId);
-mysqli_stmt_execute($stmtComm);
-$commentsResult = mysqli_stmt_get_result($stmtComm);
-$comments = mysqli_fetch_all($commentsResult, MYSQLI_ASSOC);
-mysqli_stmt_close($stmtComm);
-
-mysqli_close($conn);
-
-// 4. Pastikan surat ditemukan.
-if (!$letter) {
-    http_response_code(404);
-    exit('Letter not found.');
 }
 
 // 5. Periksa apakah surat sudah boleh dibuka.
@@ -401,6 +525,58 @@ $sanitizeLetterHtml = static function (string $html): string {
                                     </div>
                                 </div>
                             </div>
+
+                            <?php if ((int) $letter['is_public'] === 1): ?>
+                                <div class="p-3 p-md-4 bg-light rounded-3 mb-4">
+                                    <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3">
+                                        <div>
+                                            <h2 class="h6 fw-bold mb-1">Enjoyed this letter?</h2>
+                                            <p class="text-secondary small mb-0">
+                                                Show your appreciation by giving this letter a like.
+                                            </p>
+                                        </div>
+
+                                        <div class="d-flex align-items-center gap-3">
+                                            <form
+                                                method="POST"
+                                                action="<?= $escape($baseUrl . '/resources/views/detail-letter.php?id=' . (int) $letter['id']) ?>"
+                                                class="m-0">
+                                                <input
+                                                    type="hidden"
+                                                    name="csrf_token"
+                                                    value="<?= $escape($_SESSION['csrf_token']) ?>">
+                                                <input type="hidden" name="toggle_like" value="1">
+
+                                                <button
+                                                    type="submit"
+                                                    class="btn <?= $userHasLiked ? 'btn-danger' : 'btn-outline-danger' ?> rounded-pill px-4"
+                                                    aria-pressed="<?= $userHasLiked ? 'true' : 'false' ?>">
+                                                    <i class="bi <?= $userHasLiked ? 'bi-heart-fill' : 'bi-heart' ?> me-2"></i>
+                                                    <?= $userHasLiked ? 'Liked' : 'Like' ?>
+                                                </button>
+                                            </form>
+
+                                            <span class="text-secondary small text-nowrap">
+                                                <strong><?= number_format($likeCount) ?></strong>
+                                                <?= $likeCount === 1 ? 'Like' : 'Likes' ?>
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <?php if (isset($_SESSION['like_feedback'])): ?>
+                                        <div class="alert alert-<?= $escape($_SESSION['like_feedback']['type']) ?> alert-dismissible fade show mt-3 mb-0"
+                                            role="alert">
+                                            <?= $escape($_SESSION['like_feedback']['message']) ?>
+                                            <button
+                                                type="button"
+                                                class="btn-close"
+                                                data-bs-dismiss="alert"
+                                                aria-label="Close"></button>
+                                        </div>
+                                        <?php unset($_SESSION['like_feedback']); ?>
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
 
                             <h2 class="h5 fw-bold mb-3">Letter Content</h2>
 
