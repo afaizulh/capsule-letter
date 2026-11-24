@@ -1,0 +1,29 @@
+name: Capsule Letter CI
+
+on:
+  push:
+    branches: ["main", "master", "develop"]
+  pull_request:
+
+jobs:
+  check-php-and-docker:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Check PHP syntax
+        run: |
+          if command -v php >/dev/null 2>&1; then
+            find . -name "*.php" -not -path "./vendor/*" -print0 | xargs -0 -n1 php -l
+          else
+            echo "PHP CLI tidak terpasang di host WSL; skip php -l atau pakai container PHP."
+          fi
+
+      - name: Verify Docker daemon & Compose
+        run: |
+          docker --version
+            docker compose version
+            if [ -f docker-compose.yml ] || [ -f compose.yml ]; then
+              docker compose config -q
+            fi
