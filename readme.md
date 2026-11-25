@@ -339,8 +339,9 @@ CREATE TABLE letter_likes (
 2. **Letakkan di web root**
    - Laragon: `C:\laragon\www\capsule-letter`
    - XAMPP: `C:\xampp\htdocs\capsule-letter`
+   - Docker: mount project ke document root container.
 
-   Folder **harus** bernama `capsule-letter` karena banyak path di kode menggunakan `/capsule-letter/...`.
+   Nama folder **bebas**. Semua path file memakai `__DIR__`, dan URL memakai `APP_URL`, jadi tidak lagi bergantung pada nama folder `capsule-letter`.
 
 3. **Buat database**
    - Buat database `db_capsule_letter`.
@@ -355,15 +356,37 @@ CREATE TABLE letter_likes (
      php -r "echo password_hash('password-anda', PASSWORD_DEFAULT);"
      ```
 
-4. **Sesuaikan konfigurasi**
-   - `config/database.php` → host, user, password, nama database.
-   - `config/app.php` → `$baseUrl` (default `http://localhost/capsule-letter`).
+4. **Sesuaikan konfigurasi lewat environment variable**
+   - `APP_URL` → URL publik aplikasi (default `http://localhost:8080`).
+   - `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`, `DB_PORT` → koneksi database.
+   - Contoh (PowerShell):
+     ```powershell
+     $env:APP_URL="http://localhost:8080"
+     $env:DB_HOST="127.0.0.1"
+     $env:DB_DATABASE="db_capsule_letter"
+     $env:DB_USERNAME="root"
+     $env:DB_PASSWORD=""
+     $env:DB_PORT="3306"
+     ```
+   - Contoh (Docker Compose):
+     ```yaml
+     environment:
+       APP_URL: "http://localhost:8080"
+       DB_HOST: "db"
+       DB_DATABASE: "db_capsule_letter"
+       DB_USERNAME: "root"
+       DB_PASSWORD: "secret"
+       DB_PORT: "3306"
+     ```
+   - Sesuaikan `APP_URL` dengan lokasi aplikasi:
+     - Laragon subfolder: `http://localhost/capsule-letter`
+     - Docker / document root: `http://localhost:8080`
 
 5. **Pastikan folder upload dapat ditulis**
    - `resources/uploads/` harus ada dan writable.
 
 6. **Jalankan**
-   - Akses `http://localhost/capsule-letter/`
+   - Akses sesuai nilai `APP_URL`, misalnya `http://localhost:8080/`.
    - `index.php` akan mengarahkan ke halaman login/home.
 
 ---
@@ -372,21 +395,38 @@ CREATE TABLE letter_likes (
 
 ### `config/app.php`
 ```php
-$baseUrl = "http://localhost/capsule-letter";
+$appUrl = getenv('APP_URL');
+
+$baseUrl = is_string($appUrl) && trim($appUrl) !== ''
+    ? rtrim(trim($appUrl), '/')
+    : 'http://localhost:8080';
 ```
-Digunakan sebagai basis semua link dan redirect.
+`$baseUrl` digunakan sebagai basis semua link, redirect, form action, dan asset. Ubah lewat environment variable `APP_URL` jika port/folder berbeda.
 
 ### `config/database.php`
 ```php
-$servername = "localhost";
-$database   = "db_capsule_letter";
-$username   = "root";
-$password   = "";
-$conn = mysqli_connect($servername, $username, $password, $database);
+$servername = $readEnv('DB_HOST', '127.0.0.1');
+$database   = $readEnv('DB_DATABASE', 'db_capsule_letter');
+$username   = $readEnv('DB_USERNAME', 'root');
+$port       = (int) $readEnv('DB_PORT', '3306');
+$password   = getenv('DB_PASSWORD') ?: '';
+
+$conn = mysqli_connect($servername, $username, $password, $database, $port);
 ```
 Mengembalikan objek koneksi `mysqli` yang dipakai oleh controller dan view.
 
-> Untuk produksi, jangan simpan kredensial langsung di kode. Gunakan environment variable atau file konfigurasi di luar web root.
+| Variable | Default | Keterangan |
+|---|---|---|
+| `APP_URL` | `http://localhost:8080` | URL publik aplikasi |
+| `DB_HOST` | `127.0.0.1` | Host database |
+| `DB_DATABASE` | `db_capsule_letter` | Nama database |
+| `DB_USERNAME` | `root` | User database |
+| `DB_PASSWORD` | `""` | Password database |
+| `DB_PORT` | `3306` | Port database |
+
+> **Docker:** gunakan `DB_HOST=db` (nama service MySQL di Compose), bukan `localhost`. Di dalam container PHP, `localhost` menunjuk ke container PHP itu sendiri.
+>
+> **Produksi:** jangan commit kredensial. Set environment variable melalui server/Compose/secret manager.
 
 ---
 
@@ -436,10 +476,8 @@ Workflow menggunakan **self-hosted runner**.
 
 Beberapa hal yang perlu diketahui untuk pengembangan selanjutnya:
 
-- **Path hardcoded**: banyak file memakai `$_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/...'` dan URL absolut `/capsule-letter/...`. Jika nama folder diubah, semua path harus disesuaikan.
 - **Belum ada file migrasi/seed SQL** di repo. Skema database perlu dibuat manual.
 - **`controller/edit-letter/process-edit.php` masih kosong**. Proses edit sebenarnya ditangani oleh `update-letter/process-update.php`.
-- **Redirect admin di controller**: `process-category.php` dan `process-word.php` mengarah ke `/resources/views/login.php` (tidak ada) saat akses ditolak; seharusnya ke `auth/login.php` atau `home.php`.
 - **CSRF belum diterapkan** pada form create dan comment.
 - **Validasi komentar** (surat publik & sudah terbuka) belum dicek ulang di server pada `process-comment.php`.
 - **Hapus data admin** menggunakan `GET` (`?action=delete&id=...`), sebaiknya diubah ke `POST` + CSRF.
