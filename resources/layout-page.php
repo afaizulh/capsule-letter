@@ -1,18 +1,18 @@
 <?php
-include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
+include_once __DIR__ . '/../config/app.php';
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
 
 <head>
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/head.php'; ?>
+    <?php include __DIR__ . '/includes/head.php'; ?>
 </head>
 
 <body>
 
     <!-- SIDEBAR -->
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/sidebar.php'; ?>
+    <?php include __DIR__ . '/includes/sidebar.php'; ?>
 
     <!-- MAIN CONTENT AREA -->
     <div class="main-content">
@@ -20,7 +20,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
         <!-- Top Navigation / Header -->
         <header class="p-4 border-bottom d-flex justify-content-between align-items-center bg-white">
             <span class="text-uppercase text-secondary fw-semibold" id="topBadge" style="font-size: 12px; letter-spacing: 1.5px;">CREATE</span>
-            <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/profile-badge.php'; ?>
+            <?php include __DIR__ . '/includes/profile-badge.php'; ?>
         </header>
 
         <!-- Dynamic Content View Container -->
@@ -29,10 +29,10 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
         </main>
 
         <!-- Footer -->
-        <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/footer.php'; ?>
+        <?php include __DIR__ . '/includes/footer.php'; ?>
     </div>
 
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/scripts.php'; ?>
+    <?php include __DIR__ . '/includes/scripts.php'; ?>
 </body>
 
 </html>

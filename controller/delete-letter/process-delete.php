@@ -5,8 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once $_SERVER['DOCUMENT_ROOT']
-    . '/capsule-letter/config/app.php';
+require_once __DIR__ . '/../../config/app.php';
 
 $myLettersUrl = $baseUrl . '/resources/views/my-letter.php';
 
@@ -63,8 +62,7 @@ $conn = null;
 
 try {
     // 4. Sambungkan ke database.
-    $conn = require $_SERVER['DOCUMENT_ROOT']
-        . '/capsule-letter/config/database.php';
+    $conn = require __DIR__ . '/../../config/database.php';
 
     mysqli_set_charset($conn, 'utf8mb4');
     mysqli_query($conn, "SET time_zone = '+07:00'");
@@ -136,7 +134,7 @@ try {
         basename($attachment) === $attachment
     ) {
         $uploadDirectory = realpath(
-            $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/uploads'
+            __DIR__ . '/../../resources/uploads'
         );
 
         if ($uploadDirectory !== false) {

@@ -1,6 +1,9 @@
 <?php
 session_start();
-$conn = require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/database.php';
+
+require_once __DIR__ . '/../../config/app.php';
+
+$conn = require_once __DIR__ . '/../../config/database.php';
 
 $first_name       = trim($_POST['first_name'] ?? '');
 $last_name        = trim($_POST['last_name'] ?? '');
@@ -19,7 +22,7 @@ if ($password !== $confirm_password) $errors[] = 'Password confirmation does not
 
 if (!empty($errors)) {
     $_SESSION['error'] = implode('<br>', $errors);
-    header('Location: /capsule-letter/resources/views/auth/register.php');
+    header('Location: ' . $baseUrl . '/resources/views/auth/register.php');
     exit;
 }
 
@@ -31,7 +34,7 @@ mysqli_stmt_store_result($stmt);
 
 if (mysqli_stmt_num_rows($stmt) > 0) {
     $_SESSION['error'] = 'Email already registered. Please use a different email.';
-    header('Location: /capsule-letter/resources/views/auth/register.php');
+    header('Location: ' . $baseUrl . '/resources/views/auth/register.php');
     exit;
 }
 mysqli_stmt_close($stmt);
@@ -45,10 +48,10 @@ mysqli_stmt_bind_param($stmt, "sss", $name, $email, $hashedPassword);
 
 if (mysqli_stmt_execute($stmt)) {
     $_SESSION['success'] = 'Registration successful! Please login.';
-    header('Location: /capsule-letter/resources/views/auth/login.php');
+    header('Location: ' . $baseUrl . '/resources/views/auth/login.php');
 } else {
     $_SESSION['error'] = 'Failed to register: ' . mysqli_error($conn);
-    header('Location: /capsule-letter/resources/views/register.php');
+    header('Location: ' . $baseUrl . '/resources/views/auth/register.php');
 }
 
 mysqli_stmt_close($stmt);

@@ -1,2 +1,5 @@
 <?php
-header("Location: /capsule-letter/resources/views/home.php");
+require_once __DIR__ . '/config/app.php';
+
+header('Location: ' . $baseUrl . '/resources/views/home.php');
+exit;

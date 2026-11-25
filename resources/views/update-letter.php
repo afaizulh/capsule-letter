@@ -3,15 +3,14 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once $_SERVER['DOCUMENT_ROOT']
-    . '/capsule-letter/config/app.php';
+require_once __DIR__ . '/../../config/app.php';
 
 // 1. Authentication
 if (
     !isset($_SESSION['logged_in']) ||
     $_SESSION['logged_in'] !== true
 ) {
-    header('Location: /capsule-letter/resources/views/auth/login.php');
+    header('Location: ' . $baseUrl . '/resources/views/auth/login.php');
     exit;
 }
 
@@ -31,8 +30,7 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 try {
     // 2. Database connection
-    $conn = require_once $_SERVER['DOCUMENT_ROOT']
-        . '/capsule-letter/config/database.php';
+    $conn = require_once __DIR__ . '/../../config/database.php';
 
     mysqli_set_charset($conn, 'utf8mb4');
     mysqli_query($conn, "SET time_zone = '+07:00'");
@@ -116,7 +114,7 @@ $attachment = (string) ($letter['attachment'] ?? '');
 <html lang="id">
 
 <head>
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/head.php'; ?>
+    <?php include __DIR__ . '/../includes/head.php'; ?>
 
     <title>Update Letter | Capsule Letter</title>
 
@@ -131,7 +129,7 @@ $attachment = (string) ($letter['attachment'] ?? '');
 <body>
 
     <!-- SIDEBAR -->
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/sidebar.php'; ?>
+    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 
     <div class="main-content">
 
@@ -144,7 +142,7 @@ $attachment = (string) ($letter['attachment'] ?? '');
                 UPDATE LETTER
             </span>
 
-            <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/profile-badge.php'; ?>
+            <?php include __DIR__ . '/../includes/profile-badge.php'; ?>
 
         </header>
 
@@ -471,11 +469,11 @@ $attachment = (string) ($letter['attachment'] ?? '');
         </main>
 
         <!-- FOOTER -->
-        <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/footer.php'; ?>
+        <?php include __DIR__ . '/../includes/footer.php'; ?>
 
     </div>
 
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/scripts.php'; ?>
+    <?php include __DIR__ . '/../includes/scripts.php'; ?>
 
     <!-- SAVE CHANGES CONFIRMATION MODAL -->
     <div class="update-confirm-overlay"

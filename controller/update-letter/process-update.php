@@ -4,8 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once $_SERVER['DOCUMENT_ROOT']
-    . '/capsule-letter/config/app.php';
+require_once __DIR__ . '/../../config/app.php';
 
 $myLettersUrl = $baseUrl . '/resources/views/my-letter.php';
 
@@ -136,8 +135,7 @@ $newFilePath = null;
 
 try {
     // 4. Database connection
-    $conn = require $_SERVER['DOCUMENT_ROOT']
-        . '/capsule-letter/config/database.php';
+    $conn = require __DIR__ . '/../../config/database.php';
 
     mysqli_set_charset($conn, 'utf8mb4');
     mysqli_query($conn, "SET time_zone = '+07:00'");
@@ -270,8 +268,7 @@ try {
             );
         }
 
-        $uploadDir = $_SERVER['DOCUMENT_ROOT']
-            . '/capsule-letter/resources/uploads/';
+        $uploadDir = __DIR__ . '/../../resources/uploads/';
 
         if (
             !is_dir($uploadDir) &&
@@ -356,8 +353,7 @@ try {
         mysqli_stmt_close($stmt);
 
         if ((int) $countRow['total'] === 0) {
-            $oldPath = $_SERVER['DOCUMENT_ROOT']
-                . '/capsule-letter/resources/uploads/'
+            $oldPath = __DIR__ . '/../../resources/uploads/'
                 . basename($oldAttachment);
 
             if (is_file($oldPath)) {

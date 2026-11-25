@@ -3,19 +3,21 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once __DIR__ . '/../../config/app.php';
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: /capsule-letter/resources/views/auth/login.php');
+    header('Location: ' . $baseUrl . '/resources/views/auth/login.php');
     exit;
 }
 
-$conn = require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/database.php';
+$conn = require_once __DIR__ . '/../../config/database.php';
 
 $email    = trim($_POST['email'] ?? '');
 $password = $_POST['password'] ?? '';
 
 if (empty($email) || empty($password)) {
     $_SESSION['error'] = 'Email and password are required.';
-    header('Location: /capsule-letter/resources/views/auth/login.php');
+    header('Location: ' . $baseUrl . '/resources/views/auth/login.php');
     exit;
 }
 
@@ -40,14 +42,14 @@ if ($user = mysqli_fetch_assoc($result)) {
         $_SESSION['logged_in']  = true;
 
         if ($_SESSION['role'] === 'admin') {
-            header('Location: /capsule-letter/resources/views/admin/dashboard.php');
+            header('Location: ' . $baseUrl . '/resources/views/admin/dashboard.php');
         } else {
-            header('Location: /capsule-letter/resources/views/home.php');
+            header('Location: ' . $baseUrl . '/resources/views/home.php');
         }
         exit;
     }
 }
 
 $_SESSION['error'] = 'Email or password is incorrect.';
-header('Location: /capsule-letter/resources/views/auth/login.php');
+header('Location: ' . $baseUrl . '/resources/views/auth/login.php');
 exit;

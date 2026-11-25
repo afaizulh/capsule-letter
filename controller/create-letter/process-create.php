@@ -3,10 +3,12 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$conn = require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/database.php';
+require_once __DIR__ . '/../../config/app.php';
+
+$conn = require_once __DIR__ . '/../../config/database.php';
 
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-    header('Location: /capsule-letter/resources/views/auth/login.php');
+    header('Location: ' . $baseUrl . '/resources/views/auth/login.php');
     exit;
 }
 
@@ -45,7 +47,7 @@ if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ER
         $newFileName = md5(time() . $fileName) . '.' . $fileExtension;
         
         // Tentukan direktori upload (Pastikan folder uploads/ sudah dibuat di root project)
-        $uploadFileDir = $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/uploads/';
+        $uploadFileDir = __DIR__ . '/../../resources/uploads/';
         if (!is_dir($uploadFileDir)) {
             mkdir($uploadFileDir, 0755, true);
         }
@@ -63,7 +65,7 @@ if (!empty($errors)) {
     $_SESSION['error'] = implode('<br>', array_map(function ($e) {
         return htmlspecialchars($e, ENT_QUOTES, 'UTF-8');
     }, $errors));
-    header('Location: /capsule-letter/resources/views/create.php');
+    header('Location: ' . $baseUrl . '/resources/views/create.php');
     exit;
 }
 
@@ -86,5 +88,5 @@ if ($stmt) {
 
 // Tutup koneksi
 mysqli_close($conn);
-header('Location: /capsule-letter/resources/views/create.php');
+header('Location: ' . $baseUrl . '/resources/views/create.php');
 exit;
