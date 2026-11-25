@@ -1,10 +1,10 @@
 <?php
 session_start();
 
-include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
+include_once __DIR__ . '/../../../config/app.php';
 
 if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
-    header('Location: home.php');
+    header('Location: ' . $baseUrl . '/resources/views/home.php');
     exit;
 }
 ?>
@@ -12,7 +12,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
 <html lang="id">
 
 <head>
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/head.php'; ?>
+    <?php include __DIR__ . '/../../includes/head.php'; ?>
     <title>Sign Up - Capsule Letter</title>
     <style>
         body {
@@ -122,7 +122,7 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
                                                                 unset($_SESSION['error']); ?></div>
             <?php endif; ?>
 
-            <form action="/capsule-letter/controller/auth/process-register.php" method="POST">
+            <form action="<?= $baseUrl ?>/controller/auth/process-register.php" method="POST">
                 <!-- First Name & Last Name (Side by side) -->
                 <div class="row g-2 mb-3">
                     <div class="col-6 form-control-icon">
@@ -167,9 +167,9 @@ if (isset($_SESSION['logged_in']) && $_SESSION['logged_in'] === true) {
     </div>
 
     <!-- Footer -->
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/footer.php'; ?>
+    <?php include __DIR__ . '/../../includes/footer.php'; ?>
 
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/script-eye.php'; ?>
+    <?php include __DIR__ . '/../../includes/script-eye.php'; ?>
 </body>
 
 </html>

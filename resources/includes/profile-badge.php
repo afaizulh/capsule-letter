@@ -21,7 +21,7 @@ $username = $_SESSION['user_name'] ?? 'User';
     <!-- Menu Dropdown -->
     <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
         <li>
-            <a class="dropdown-item text-danger d-flex align-items-center gap-2 fw-semibold py-2" href="/capsule-letter/controller/auth/process-logout.php">
+            <a class="dropdown-item text-danger d-flex align-items-center gap-2 fw-semibold py-2" href="<?= htmlspecialchars($baseUrl . '/controller/auth/process-logout.php', ENT_QUOTES, 'UTF-8') ?>">
                 <i class="bi bi-box-arrow-right fs-5"></i> Logout
             </a>
         </li>

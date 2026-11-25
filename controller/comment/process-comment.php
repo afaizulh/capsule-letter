@@ -3,11 +3,13 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$conn = require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/database.php';
+require_once __DIR__ . '/../../config/app.php';
+
+$conn = require_once __DIR__ . '/../../config/database.php';
 
 // Cek apakah user sudah login
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-    header('Location: /capsule-letter/resources/views/auth/login.php');
+    header('Location: ' . $baseUrl . '/resources/views/auth/login.php');
     exit;
 }
 
@@ -20,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($letterId <= 0 || empty($cleanComment)) {
         $_SESSION['error'] = 'Comment cannot be empty.';
-        header('Location: /capsule-letter/resources/views/detail-letter.php?id=' . $letterId);
+        header('Location: ' . $baseUrl . '/resources/views/detail-letter.php?id=' . $letterId);
         exit;
     }
 
@@ -63,9 +65,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     mysqli_close($conn);
 
     // Redirect kembali ke halaman detail surat
-    header('Location: /capsule-letter/resources/views/detail-letter.php?id=' . $letterId);
+    header('Location: ' . $baseUrl . '/resources/views/detail-letter.php?id=' . $letterId);
     exit;
 } else {
-    header('Location: /capsule-letter/resources/views/home.php');
+    header('Location: ' . $baseUrl . '/resources/views/home.php');
     exit;
 }

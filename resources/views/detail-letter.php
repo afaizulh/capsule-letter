@@ -10,8 +10,7 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-require_once $_SERVER['DOCUMENT_ROOT']
-    . '/capsule-letter/config/app.php';
+require_once __DIR__ . '/../../config/app.php';
 
 // 1. Pastikan user sudah login.
 if (
@@ -46,8 +45,7 @@ $likeCount = 0;
 $userHasLiked = false;
 
 try {
-    $conn = require $_SERVER['DOCUMENT_ROOT']
-        . '/capsule-letter/config/database.php';
+    $conn = require __DIR__ . '/../../config/database.php';
 
     mysqli_set_charset($conn, 'utf8mb4');
     mysqli_query($conn, "SET time_zone = '+07:00'");
@@ -241,8 +239,7 @@ if (isset($_GET['download']) && $_GET['download'] === '1') {
     }
 
     $uploadDirectory = realpath(
-        $_SERVER['DOCUMENT_ROOT']
-            . '/capsule-letter/resources/uploads'
+        __DIR__ . '/../uploads'
     );
 
     if ($uploadDirectory === false) {
@@ -434,12 +431,12 @@ $sanitizeLetterHtml = static function (string $html): string {
 <html lang="id">
 
 <head>
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/head.php'; ?>
+    <?php include __DIR__ . '/../includes/head.php'; ?>
     <title>Letter Details | Capsule Letter</title>
 </head>
 
 <body>
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/sidebar.php'; ?>
+    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 
     <div class="main-content">
         <header class="p-4 border-bottom d-flex justify-content-between align-items-center bg-white">
@@ -448,7 +445,7 @@ $sanitizeLetterHtml = static function (string $html): string {
                 LETTER DETAILS
             </span>
 
-            <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/profile-badge.php'; ?>
+            <?php include __DIR__ . '/../includes/profile-badge.php'; ?>
         </header>
 
         <main class="container-fluid p-4 p-md-5">
@@ -651,7 +648,7 @@ $sanitizeLetterHtml = static function (string $html): string {
 
                         <!-- Form Kirim Komentar (Hanya muncul jika surat publik & sudah terbuka) -->
                         <?php if ((int)$letter['is_public'] === 1 && $isOpen): ?>
-                            <form action="/capsule-letter/controller/comment/process-comment.php" method="POST" class="mb-4" onsubmit="tinymce.triggerSave();">
+                            <form action="<?= $escape($baseUrl . '/controller/comment/process-comment.php') ?>" method="POST" class="mb-4" onsubmit="tinymce.triggerSave();">
                                 <input type="hidden" name="letter_id" value="<?= $letterId; ?>">
                                 <div class="mb-3">
                                     <textarea class="form-control tinymce-editor" name="comment" rows="3" placeholder="Write a public comment..."></textarea>
@@ -690,10 +687,10 @@ $sanitizeLetterHtml = static function (string $html): string {
             </div>
         </main>
 
-        <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/footer.php'; ?>
+        <?php include __DIR__ . '/../includes/footer.php'; ?>
     </div>
 
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/scripts.php'; ?>
+    <?php include __DIR__ . '/../includes/scripts.php'; ?>
 </body>
 
 </html>

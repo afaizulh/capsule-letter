@@ -3,11 +3,11 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
+require_once __DIR__ . '/../../config/app.php';
 
 // Cek apakah user sudah login atau belum
 if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
-    header('Location: /capsule-letter/resources/views/auth/login.php');
+    header('Location: ' . $baseUrl . '/resources/views/auth/login.php');
     exit;
 }
 
@@ -35,7 +35,7 @@ header('Cache-Control: no-store');
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 try {
-    $conn = require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/database.php';
+    $conn = require_once __DIR__ . '/../../config/database.php';
 
     mysqli_set_charset($conn, 'utf8mb4');
     mysqli_query($conn, "SET time_zone = '+07:00'");
@@ -112,15 +112,15 @@ $letterNow = new DateTimeImmutable('now', $letterTimezone);
 <html lang="id">
 
 <head>
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/head.php'; ?>
+    <?php include __DIR__ . '/../includes/head.php'; ?>
     <link rel="stylesheet"
-        href="/capsule-letter/resources/css/my-letter.css">
+        href="<?= $escapeLetter($baseUrl . '/resources/css/my-letter.css') ?>">
 </head>
 
 <body>
 
     <!-- SIDEBAR -->
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/sidebar.php'; ?>
+    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 
     <!-- MAIN CONTENT AREA -->
     <div class="main-content">
@@ -128,7 +128,7 @@ $letterNow = new DateTimeImmutable('now', $letterTimezone);
         <!-- Top Navigation / Header -->
         <header class="p-4 border-bottom d-flex justify-content-between align-items-center bg-white">
             <span class="text-uppercase text-secondary fw-semibold" id="topBadge" style="font-size: 12px; letter-spacing: 1.5px;">MY LETTER</span>
-            <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/profile-badge.php'; ?>
+            <?php include __DIR__ . '/../includes/profile-badge.php'; ?>
         </header>
 
         <!-- Dynamic Content View Container -->
@@ -358,10 +358,10 @@ $letterNow = new DateTimeImmutable('now', $letterTimezone);
         </main>
 
         <!-- Footer -->
-        <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/footer.php'; ?>
+        <?php include __DIR__ . '/../includes/footer.php'; ?>
     </div>
 
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/scripts.php'; ?>
+    <?php include __DIR__ . '/../includes/scripts.php'; ?>
     
     <!-- Update Confirmation Modal -->
     <div class="update-confirm-overlay" id="updateConfirmModal"

@@ -1,10 +1,13 @@
 <?php
 session_start();
-$conn = require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/database.php';
+
+require_once __DIR__ . '/../../config/app.php';
+
+$conn = require_once __DIR__ . '/../../config/database.php';
 
 // Proteksi: Hanya Admin
 if (!isset($_SESSION['logged_in']) || $_SESSION['role'] !== 'admin') {
-    header('Location: /capsule-letter/resources/views/login.php');
+    header('Location: ' . $baseUrl . '/resources/views/auth/login.php');
     exit;
 }
 
@@ -38,5 +41,5 @@ if ($action === 'add' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 mysqli_close($conn);
-header('Location: /capsule-letter/resources/views/admin/dashboard.php');
+header('Location: ' . $baseUrl . '/resources/views/admin/dashboard.php');
 exit;

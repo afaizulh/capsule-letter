@@ -3,13 +3,13 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-include_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/app.php';
-$conn = require_once $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/config/database.php';
+include_once __DIR__ . '/../../../config/app.php';
+$conn = require_once __DIR__ . '/../../../config/database.php';
 
 // Proteksi Hak Akses: Hanya Admin
 if (!isset($_SESSION['logged_in']) || $_SESSION['role'] !== 'admin') {
     $_SESSION['error'] = 'Access denied. This page is only for administrators.';
-    header('Location: /capsule-letter/resources/views/home.php');
+    header('Location: ' . $baseUrl . '/resources/views/home.php');
     exit;
 }
 
@@ -22,21 +22,21 @@ $words = mysqli_query($conn, "SELECT * FROM forbidden_words ORDER BY id DESC");
 <html lang="id">
 
 <head>
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/head.php'; ?>
+    <?php include __DIR__ . '/../../includes/head.php'; ?>
     <title>Admin Dashboard - Capsule Letter</title>
 </head>
 
 <body>
 
     <!-- SIDEBAR -->
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/sidebar.php'; ?>
+    <?php include __DIR__ . '/../../includes/sidebar.php'; ?>
 
     <div class="main-content">
 
         <!-- Top Header -->
         <header class="p-4 border-bottom d-flex justify-content-between align-items-center bg-white">
             <span class="badge bg-danger text-uppercase px-3 py-2" style="letter-spacing: 1.5px;">ADMIN PANEL</span>
-            <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/profile-badge.php'; ?>
+            <?php include __DIR__ . '/../../includes/profile-badge.php'; ?>
         </header>
 
         <main class="container-fluid p-4 p-md-5">
@@ -69,7 +69,7 @@ $words = mysqli_query($conn, "SELECT * FROM forbidden_words ORDER BY id DESC");
                         <h4 class="fw-bold mb-3"><i class="bi bi-tags me-2"></i> Letter Categories</h4>
 
                         <!-- Form Tambah Kategori -->
-                        <form action="/capsule-letter/controller/admin/process-category.php?action=add" method="POST" class="mb-4">
+                        <form action="<?= $baseUrl ?>/controller/admin/process-category.php?action=add" method="POST" class="mb-4">
                             <div class="input-group">
                                 <input type="text" name="name" class="form-control" placeholder="New Category Name" required>
                                 <button type="submit" class="btn btn-dark">+ Add</button>
@@ -135,10 +135,10 @@ $words = mysqli_query($conn, "SELECT * FROM forbidden_words ORDER BY id DESC");
 
         </main>
 
-        <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/footer.php'; ?>
+        <?php include __DIR__ . '/../../includes/footer.php'; ?>
     </div>
 
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/scripts.php'; ?>
+    <?php include __DIR__ . '/../../includes/scripts.php'; ?>
 </body>
 
 </html>

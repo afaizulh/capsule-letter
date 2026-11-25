@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="../css/sidebar.css">
+<link rel="stylesheet" href="<?= htmlspecialchars($baseUrl . '/resources/css/sidebar.css', ENT_QUOTES, 'UTF-8') ?>">
 
 <!-- Mobile Header Toggle -->
 <div class="d-lg-none p-3 border-bottom d-flex justify-content-between align-items-center bg-white sticky-top">

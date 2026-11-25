@@ -4,8 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once $_SERVER['DOCUMENT_ROOT']
-    . '/capsule-letter/config/app.php';
+require_once __DIR__ . '/../../config/app.php';
 
 if (
     !isset($_SESSION['logged_in']) ||
@@ -24,8 +23,7 @@ if ($userId <= 0) {
     exit;
 }
 
-$conn = require $_SERVER['DOCUMENT_ROOT']
-    . '/capsule-letter/config/database.php';
+$conn = require __DIR__ . '/../../config/database.php';
 
 mysqli_set_charset($conn, 'utf8mb4');
 mysqli_query($conn, "SET time_zone = '+07:00'");
@@ -119,7 +117,7 @@ mysqli_close($conn);
 <html lang="id">
 
 <head>
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/head.php'; ?>
+    <?php include __DIR__ . '/../includes/head.php'; ?>
 </head>
 
 <link rel="stylesheet" href="<?= $escape($baseUrl . '/resources/css/public-letter-feed.css') ?>">
@@ -129,7 +127,7 @@ mysqli_close($conn);
 <body>
 
     <!-- SIDEBAR -->
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/sidebar.php'; ?>
+    <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 
     <!-- MAIN CONTENT AREA -->
     <div class="main-content">
@@ -137,7 +135,7 @@ mysqli_close($conn);
         <!-- Top Navigation / Header -->
         <header class="p-4 border-bottom d-flex justify-content-between align-items-center bg-white">
             <span class="text-uppercase text-secondary fw-semibold" id="topBadge" style="font-size: 12px; letter-spacing: 1.5px;">HOME</span>
-            <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/profile-badge.php'; ?>
+            <?php include __DIR__ . '/../includes/profile-badge.php'; ?>
         </header>
 
         <!-- Dynamic Content View Container -->
@@ -377,10 +375,10 @@ mysqli_close($conn);
         </main>
 
         <!-- Footer -->
-        <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/footer.php'; ?>
+        <?php include __DIR__ . '/../includes/footer.php'; ?>
     </div>
 
-    <?php include $_SERVER['DOCUMENT_ROOT'] . '/capsule-letter/resources/includes/scripts.php'; ?>
+    <?php include __DIR__ . '/../includes/scripts.php'; ?>
 </body>
 
 </html>
